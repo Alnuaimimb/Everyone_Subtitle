@@ -6,6 +6,6 @@ class GeneralBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(NetworkManager());
-    Get.put(LoginController());
+    Get.put(LoginController()); //ddddddd
   }
 }
