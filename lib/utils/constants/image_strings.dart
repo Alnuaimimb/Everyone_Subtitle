@@ -25,7 +25,7 @@ class TImages {
 
   // -- OnBoarding Texts
   static const String onBoardingImage1 =
-      "assets/images/on_boarding_images/search.gif";
+      "assets/images/on_boarding_images/communicate.gif";
   static const String onBoardingImage2 =
       "assets/images/on_boarding_images/meetFriends.gif";
   static const String onBoardingImage3 =

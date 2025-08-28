@@ -1,3 +1,5 @@
+// FIX THE EMAIL
+
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -24,7 +26,7 @@ class VerifyEmailController extends GetxController {
         debugPrint("User is logged in: ${user.email}");
 
         // Only check verification status if it hasn't been stored as true
-        if (isEmailVerified == null || !isEmailVerified) {
+        if (false) {
           checkEmailVerificationStatus();
         }
       } else {

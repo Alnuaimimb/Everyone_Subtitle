@@ -9,18 +9,18 @@ class TTexts {
   static const String tContinue = "Continue";
 
   // starter screen
-  static const String welcome = 'Event app 🎪';
+  static const String welcome = 'Everyone_subtitle';
 // -- OnBoarding Texts
-  static const String onBoardingTitle1 = "Find events in melbourne";
-  static const String onBoardingTitle2 = "Meet new friends";
-  static const String onBoardingTitle3 = "Find new hobies";
+  static const String onBoardingTitle1 = "communicate easly";
+  static const String onBoardingTitle2 = "make friends";
+  static const String onBoardingTitle3 = "explore the world";
 
   static const String onBoardingSubTitle1 =
-      "Browse upcoming events across Melbourne and never miss out on the fun!";
+      "choose the best AI voice and make it yours ";
   static const String onBoardingSubTitle2 =
-      "Connect with like-minded people and turn strangers into friends!";
+      "Connect with like-minded people with more confident";
   static const String onBoardingSubTitle3 =
-      "Discover exciting hobbies and ignite your passions today!";
+      "No more limits on where you can go or with whome you can speak";
 
   // -- Authentication Forms
   static const String firstName = "First Name";
