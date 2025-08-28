@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:event_app/common/widgets/custome_curved_edges.dart';
-import 'package:event_app/utils/constants/colors.dart';
+import 'package:everyone_subtitle/common/widgets/custome_curved_edges.dart';
+import 'package:everyone_subtitle/utils/constants/colors.dart';
 
 class HeaderContainer extends StatelessWidget {
   const HeaderContainer({super.key, required this.child, required this.size});

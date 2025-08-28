@@ -5,15 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:event_app/Features/authentication/controllers/signup/verify_email_controller.dart';
-import 'package:event_app/Features/authentication/screens/login/login.dart';
-import 'package:event_app/Features/authentication/screens/onboarding/onboarding.dart';
-import 'package:event_app/Features/authentication/screens/signup/verify_email.dart';
-import 'package:event_app/navigation_menue.dart';
-import 'package:event_app/utils/exceptions/firebase_auth_exceptions.dart';
-import 'package:event_app/utils/exceptions/firebase_exceptions.dart';
-import 'package:event_app/utils/exceptions/format_exceptions.dart';
-import 'package:event_app/utils/exceptions/platform_exceptions.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/signup/verify_email_controller.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/onboarding/onboarding.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/signup/verify_email.dart';
+import 'package:everyone_subtitle/navigation_menue.dart';
+import 'package:everyone_subtitle/utils/exceptions/firebase_auth_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/firebase_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/format_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/platform_exceptions.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();

@@ -1,16 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:event_app/Features/authentication/models/user_model.dart';
-import 'package:event_app/data/repositories/authentication/authentication_repository.dart';
-import 'package:event_app/data/repositories/user/user_repository.dart';
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/Features/authentication/models/user_model.dart';
+import 'package:everyone_subtitle/data/repositories/authentication/authentication_repository.dart';
+import 'package:everyone_subtitle/data/repositories/user/user_repository.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
-import 'package:event_app/utils/helpers/network_manager.dart';
-import 'package:event_app/utils/popups/full_screen_loader.dart';
-import 'package:event_app/utils/popups/loaders.dart';
-import 'package:event_app/Features/authentication/screens/signup/verify_email.dart';
+import 'package:everyone_subtitle/utils/helpers/network_manager.dart';
+import 'package:everyone_subtitle/utils/popups/full_screen_loader.dart';
+import 'package:everyone_subtitle/utils/popups/loaders.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/signup/verify_email.dart';
 
 class SignupController extends GetxController {
   static SignupController get instance => Get.find();

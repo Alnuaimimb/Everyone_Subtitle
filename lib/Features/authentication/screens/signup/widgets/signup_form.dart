@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:event_app/Features/authentication/controllers/signup/signup_controller.dart';
-import 'package:event_app/utils/constants/colors.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/helpers/helper_functions.dart';
-import 'package:event_app/utils/validators/validation.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/signup/signup_controller.dart';
+import 'package:everyone_subtitle/utils/constants/colors.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/helpers/helper_functions.dart';
+import 'package:everyone_subtitle/utils/validators/validation.dart';
 
 class SignupForm extends StatelessWidget {
   const SignupForm({

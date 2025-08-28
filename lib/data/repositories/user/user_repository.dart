@@ -6,13 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:event_app/Features/authentication/models/user_model.dart';
-import 'package:event_app/Features/authentication/screens/login/login.dart';
-import 'package:event_app/Features/authentication/screens/onboarding/onboarding.dart';
-import 'package:event_app/utils/exceptions/firebase_auth_exceptions.dart';
-import 'package:event_app/utils/exceptions/firebase_exceptions.dart';
-import 'package:event_app/utils/exceptions/format_exceptions.dart';
-import 'package:event_app/utils/exceptions/platform_exceptions.dart';
+import 'package:everyone_subtitle/Features/authentication/models/user_model.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/onboarding/onboarding.dart';
+import 'package:everyone_subtitle/utils/exceptions/firebase_auth_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/firebase_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/format_exceptions.dart';
+import 'package:everyone_subtitle/utils/exceptions/platform_exceptions.dart';
 
 class UserRepository extends GetxController {
   static UserRepository get instance => Get.find();

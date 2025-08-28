@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
-import 'package:event_app/common/styles/spacing_style.dart';
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/helpers/helper_functions.dart';
+import 'package:everyone_subtitle/common/styles/spacing_style.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/helpers/helper_functions.dart';
 
 class SucessScreen extends StatelessWidget {
   const SucessScreen({

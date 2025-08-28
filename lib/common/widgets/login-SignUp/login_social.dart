@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:event_app/utils/constants/colors.dart';
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/colors.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
 
 class LoginSocial extends StatelessWidget {
   const LoginSocial({

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:event_app/Features/authentication/controllers/login_controller.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/login_controller.dart';
 
-import 'package:event_app/data/repositories/authentication/authentication_repository.dart';
+import 'package:everyone_subtitle/data/repositories/authentication/authentication_repository.dart';
 
 class NavigationMenue extends StatelessWidget {
   const NavigationMenue({super.key});

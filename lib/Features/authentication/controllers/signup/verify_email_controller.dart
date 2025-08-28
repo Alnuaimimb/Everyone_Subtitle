@@ -5,11 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:event_app/common/widgets/rusable_screens/sucess_screen.dart';
-import 'package:event_app/data/repositories/authentication/authentication_repository.dart';
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/popups/loaders.dart';
+import 'package:everyone_subtitle/common/widgets/rusable_screens/sucess_screen.dart';
+import 'package:everyone_subtitle/data/repositories/authentication/authentication_repository.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/popups/loaders.dart';
 
 class VerifyEmailController extends GetxController {
   static VerifyEmailController get instance => Get.find();

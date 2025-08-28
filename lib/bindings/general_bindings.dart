@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:event_app/Features/authentication/controllers/login_controller.dart';
-import 'package:event_app/utils/helpers/network_manager.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/login_controller.dart';
+import 'package:everyone_subtitle/utils/helpers/network_manager.dart';
 
 class GeneralBindings extends Bindings {
   @override

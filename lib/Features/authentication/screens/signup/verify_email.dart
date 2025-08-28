@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:event_app/Features/authentication/controllers/signup/verify_email_controller.dart';
-import 'package:event_app/common/widgets/rusable_screens/sucess_screen.dart';
-import 'package:event_app/features/authentication/screens/login/login.dart';
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/helpers/helper_functions.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/signup/verify_email_controller.dart';
+import 'package:everyone_subtitle/common/widgets/rusable_screens/sucess_screen.dart';
+import 'package:everyone_subtitle/features/authentication/screens/login/login.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/helpers/helper_functions.dart';
 
 class VerifyEmail extends StatelessWidget {
   const VerifyEmail({

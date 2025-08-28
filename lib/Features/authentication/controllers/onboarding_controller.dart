@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:event_app/Features/authentication/screens/login/login.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 
 class onBoardingController extends GetxController {
   final deviceStorage = GetStorage();

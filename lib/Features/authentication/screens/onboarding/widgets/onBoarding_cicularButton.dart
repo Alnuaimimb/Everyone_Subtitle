@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:event_app/Features/authentication/controllers/onboarding_controller.dart';
-import 'package:event_app/utils/constants/colors.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/device/device_utility.dart';
-import 'package:event_app/utils/helpers/helper_functions.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/onboarding_controller.dart';
+import 'package:everyone_subtitle/utils/constants/colors.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/device/device_utility.dart';
+import 'package:everyone_subtitle/utils/helpers/helper_functions.dart';
 
 class onBoardingCircularButton extends StatelessWidget {
   const onBoardingCircularButton({

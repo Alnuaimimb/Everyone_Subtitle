@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 //local widgets
-import 'package:event_app/Features/authentication/controllers/onboarding_controller.dart';
-import 'package:event_app/Features/authentication/screens/onboarding/widgets/dot_navigator.dart';
-import 'package:event_app/Features/authentication/screens/onboarding/widgets/onBoarding_cicularButton.dart';
-import 'package:event_app/Features/authentication/screens/onboarding/widgets/onboarding_page.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/onboarding_controller.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/onboarding/widgets/dot_navigator.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/onboarding/widgets/onBoarding_cicularButton.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/onboarding/widgets/onboarding_page.dart';
 
 //utils
-import 'package:event_app/utils/constants/image_strings.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/device/device_utility.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/device/device_utility.dart';
 
 class onBoardingScreen extends StatelessWidget {
   const onBoardingScreen({super.key});

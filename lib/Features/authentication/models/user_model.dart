@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_app/utils/formatters/formatter.dart';
+import 'package:everyone_subtitle/utils/formatters/formatter.dart';
 
 class UserModel {
   UserModel({

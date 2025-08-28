@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:event_app/Features/authentication/controllers/login_controller.dart';
-import 'package:event_app/Features/authentication/screens/password_reset/forget_password.dart';
-import 'package:event_app/utils/constants/sizes.dart';
-import 'package:event_app/utils/constants/text_strings.dart';
-import 'package:event_app/utils/device/device_utility.dart';
-import 'package:event_app/utils/validators/validation.dart';
+import 'package:everyone_subtitle/Features/authentication/controllers/login_controller.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/password_reset/forget_password.dart';
+import 'package:everyone_subtitle/utils/constants/sizes.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/device/device_utility.dart';
+import 'package:everyone_subtitle/utils/validators/validation.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({
