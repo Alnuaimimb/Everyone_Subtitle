@@ -3,26 +3,29 @@ import 'package:http/http.dart' as http;
 import 'package:everyone_subtitle/Features/quiz/models/user_profile.dart';
 
 class OpenAIService {
-  // Single stable path for MVP
+  // Endpoint & model (stable)
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _model = 'gpt-4o-mini'; // supported chat model
+  static const String _model = 'gpt-4o-mini';
 
-  // Set via: flutter run --dart-define=ENABLE_OPENAI=true
+  // Enable/disable remote calls via build flag (default = true)
+  // Example: flutter run --dart-define=ENABLE_OPENAI=true
   static const bool _useRemote =
       bool.fromEnvironment('ENABLE_OPENAI', defaultValue: true);
 
-  // Prefer --dart-define=OPENAI_API_KEY=sk-... ; else fallback (MVP only)
+  // Provide key via build flag (recommended):
+  // flutter run --dart-define=OPENAI_API_KEY=sk-...
+  // For MVP we keep a fallback hardcoded key; remove for production.
   static String get _apiKey {
     const k = String.fromEnvironment('OPENAI_API_KEY');
     if (k.isNotEmpty) return k;
-
-    // ⚠️ For hackathon only. Replace/remove for production.
     const hardcoded =
         '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';
     return hardcoded;
   }
 
-  // ===== Step 1: Build profile from quiz answers =====
+  // ====================== PUBLIC API ======================
+
+  /// Build a user profile from quiz answers (calls OpenAI, falls back if needed)
   static Future<UserProfile> generateUserProfile(
       List<Map<String, String>> answers) async {
     print(
@@ -31,7 +34,6 @@ class OpenAIService {
       if (!_useRemote) return _fallbackFromAnswers(answers);
 
       final prompt = _buildProfilePrompt(answers);
-
       final resp = await http
           .post(
             Uri.parse(_baseUrl),
@@ -55,13 +57,14 @@ class OpenAIService {
           )
           .timeout(const Duration(seconds: 30));
 
+      print('[OpenAI] Profile code=${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
         final content =
             (data['choices']?[0]?['message']?['content'] ?? '') as String;
         return _parseProfileFromResponse(content);
       } else {
-        print('[OpenAI] Profile HTTP ${resp.statusCode}: ${resp.body}');
+        print('[OpenAI] Profile body=${resp.body}');
         return _fallbackFromAnswers(answers);
       }
     } catch (e) {
@@ -70,52 +73,7 @@ class OpenAIService {
     }
   }
 
-  static String _buildProfilePrompt(List<Map<String, String>> answers) {
-    final answersText = answers
-        .map((a) => 'Q: ${a['question']}\nA: ${a['answer']}')
-        .join('\n\n');
-
-    return '''
-Based on the answers below, return ONLY a JSON object (no prose):
-
-$answersText
-
-{
-  "summary": "2–3 sentence summary",
-  "traits": ["trait1","trait2","trait3"],
-  "tone_preferences": ["pref1","pref2"],
-  "speaking_style": "short description"
-}
-''';
-  }
-
-  static UserProfile _parseProfileFromResponse(String response) {
-    try {
-      final s = response.indexOf('{');
-      final e = response.lastIndexOf('}') + 1;
-      final jsonString = response.substring(s, e);
-      final data = jsonDecode(jsonString);
-
-      return UserProfile(
-        summary: data['summary'] ?? 'No summary available',
-        traits: List<String>.from(data['traits'] ?? const []),
-        tonePreferences:
-            List<String>.from(data['tone_preferences'] ?? const []),
-        speakingStyle: data['speaking_style'] ?? 'Standard',
-        createdAt: DateTime.now(),
-      );
-    } catch (_) {
-      return UserProfile(
-        summary: 'Unable to generate profile.',
-        traits: const ['Adaptable', 'Communicative'],
-        tonePreferences: const ['Professional', 'Friendly'],
-        speakingStyle: 'Balanced',
-        createdAt: DateTime.now(),
-      );
-    }
-  }
-
-  // ===== Step 3: Single reply for FinalResponse flow =====
+  /// Generate a single short reply for the FinalResponse screen
   static Future<String> generateSingleResponse({
     required String transcript,
     UserProfile? userProfile,
@@ -166,15 +124,16 @@ $profileInfo
           )
           .timeout(const Duration(seconds: 30));
 
+      print('[OpenAI] SingleResp code=${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
         final content =
             (data['choices']?[0]?['message']?['content'] ?? '') as String;
         if (content.trim().isNotEmpty) return content.trim();
-        print('[OpenAI] Empty content in success response.');
+        print('[OpenAI] SingleResp empty success body=${resp.body}');
         return _fallbackSingleResponse(transcript, userProfile);
       } else {
-        print('[OpenAI] SingleResp HTTP ${resp.statusCode}: ${resp.body}');
+        print('[OpenAI] SingleResp body=${resp.body}');
         return _fallbackSingleResponse(transcript, userProfile);
       }
     } catch (e) {
@@ -183,11 +142,38 @@ $profileInfo
     }
   }
 
-  // ===== Connectivity probe (call once to verify) =====
+  /// Quick probe to see exactly what OpenAI returns (call once at startup)
+  static Future<void> debugProbe() async {
+    try {
+      print(
+          '[OpenAI] probe: useRemote=$_useRemote model=$_model keyLen=${_apiKey.length}');
+      final r = await http
+          .post(
+            Uri.parse(_baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+            },
+            body: jsonEncode({
+              'model': _model,
+              'messages': [
+                {'role': 'user', 'content': 'ping'},
+              ],
+              'max_tokens': 5,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+      print('[OpenAI] probe code=${r.statusCode}');
+      print('[OpenAI] probe body=${r.body}');
+    } catch (e) {
+      print('[OpenAI] probe error=$e');
+    }
+  }
+
+  /// Boolean-style connectivity check (optional)
   static Future<bool> testAPIConnection() async {
     try {
-      print('[OpenAI] Testing… keyLen=${_apiKey.length}, model=$_model');
-      final resp = await http
+      final r = await http
           .post(
             Uri.parse(_baseUrl),
             headers: {
@@ -203,16 +189,62 @@ $profileInfo
             }),
           )
           .timeout(const Duration(seconds: 15));
-      print('[OpenAI] Test status: ${resp.statusCode}');
-      print('[OpenAI] Test body  : ${resp.body}');
-      return resp.statusCode == 200;
+      print('[OpenAI] Test code=${r.statusCode}');
+      print('[OpenAI] Test body=${r.body}');
+      return r.statusCode == 200;
     } catch (e) {
-      print('[OpenAI] Test error: $e');
+      print('[OpenAI] Test error=$e');
       return false;
     }
   }
 
-  // ===== Fallbacks =====
+  // ====================== INTERNALS ======================
+
+  static String _buildProfilePrompt(List<Map<String, String>> answers) {
+    final answersText = answers
+        .map((a) => 'Q: ${a['question']}\nA: ${a['answer']}')
+        .join('\n\n');
+
+    return '''
+Based on the answers below, return ONLY a JSON object (no prose):
+
+$answersText
+
+{
+  "summary": "2–3 sentence summary",
+  "traits": ["trait1","trait2","trait3"],
+  "tone_preferences": ["pref1","pref2"],
+  "speaking_style": "short description"
+}
+''';
+  }
+
+  static UserProfile _parseProfileFromResponse(String response) {
+    try {
+      final s = response.indexOf('{');
+      final e = response.lastIndexOf('}') + 1;
+      final jsonString = response.substring(s, e);
+      final data = jsonDecode(jsonString);
+
+      return UserProfile(
+        summary: data['summary'] ?? 'No summary available',
+        traits: List<String>.from(data['traits'] ?? const []),
+        tonePreferences:
+            List<String>.from(data['tone_preferences'] ?? const []),
+        speakingStyle: data['speaking_style'] ?? 'Standard',
+        createdAt: DateTime.now(),
+      );
+    } catch (_) {
+      return UserProfile(
+        summary: 'Unable to generate profile.',
+        traits: const ['Adaptable', 'Communicative'],
+        tonePreferences: const ['Professional', 'Friendly'],
+        speakingStyle: 'Balanced',
+        createdAt: DateTime.now(),
+      );
+    }
+  }
+
   static UserProfile _fallbackFromAnswers(List<Map<String, String>> _) {
     return UserProfile(
       summary: 'Fallback: adaptive communicator.',
