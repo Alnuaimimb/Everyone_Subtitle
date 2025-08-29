@@ -43,10 +43,11 @@ dependencies:
   shared_preferences: ^2.5.2
 
   # Audio & Speech
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^3.0.3
   permission_handler: ^11.3.1
   record: ^5.0.4
   path_provider: ^2.1.2
+  flutter_tts: ^3.8.5
 
 
 

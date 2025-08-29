@@ -3,6 +3,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:everyone_subtitle/Features/quiz/models/user_profile.dart';
 import 'package:everyone_subtitle/data/services/ai/assemblyai_service.dart';
 import 'package:everyone_subtitle/data/services/ai/openai_service.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:everyone_subtitle/data/services/ai/profile_improvement_service.dart';
 
 /// Controls the shared state between the conversation pages.
 /// Holds the transcript (speech-to-text), recording state, and generated responses.
@@ -25,10 +28,19 @@ class ConversationController extends GetxController {
   final RxInt _indexA = (-1).obs; // rotation index for A
   final RxInt _indexB = (-1).obs; // rotation index for B
 
+  // TTS functionality
+  final FlutterTts _flutterTts = FlutterTts();
+  final RxBool isSpeaking = false.obs;
+
+  // Response history for profile improvement
+  final RxList<Map<String, dynamic>> responseHistory =
+      <Map<String, dynamic>>[].obs;
+
   @override
   void onInit() {
     super.onInit();
     _loadUserProfile();
+    _initializeTTS();
   }
 
   void _loadUserProfile() {
@@ -43,22 +55,109 @@ class ConversationController extends GetxController {
     }
   }
 
+  // Initialize TTS
+  Future<void> _initializeTTS() async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+
+    _flutterTts.setStartHandler(() {
+      isSpeaking.value = true;
+    });
+
+    _flutterTts.setCompletionHandler(() {
+      isSpeaking.value = false;
+    });
+
+    _flutterTts.setErrorHandler((msg) {
+      isSpeaking.value = false;
+      print('TTS Error: $msg');
+    });
+  }
+
+  // Speak the current response
+  Future<void> speakResponse() async {
+    if (responseText.value.isEmpty) return;
+
+    if (isSpeaking.value) {
+      await _flutterTts.stop();
+    } else {
+      await _flutterTts.speak(responseText.value);
+    }
+  }
+
+  // Test API connection
+  Future<void> testAPI() async {
+    print('Testing OpenAI API connection...');
+    final isWorking = await OpenAIService.testAPIConnection();
+    print('OpenAI API working: $isWorking');
+  }
+
+  // Save response to history for profile improvement
+  void saveResponseToHistory() {
+    if (responseText.value.isEmpty || userProfile.value == null) return;
+
+    // Save to profile improvement service
+    ProfileImprovementService.saveResponseChoice(
+      transcript: transcript.value,
+      selectedResponse: responseText.value,
+      selectedOption: selectedTone.value,
+      currentProfile: userProfile.value!,
+    );
+
+    // Also save to local history
+    final historyEntry = {
+      'timestamp': DateTime.now().toIso8601String(),
+      'transcript': transcript.value,
+      'selectedResponse': responseText.value,
+      'selectedOption': selectedTone.value,
+      'userProfile': userProfile.value?.toJson(),
+    };
+
+    responseHistory.add(historyEntry);
+
+    // Save to local storage
+    final storage = GetStorage();
+    final history = storage.read('responseHistory') ?? [];
+    history.add(historyEntry);
+    storage.write('responseHistory', history);
+
+    print('Response saved to history: ${responseText.value}');
+  }
+
   @override
   void onClose() {
     AssemblyAIService.dispose();
+    _flutterTts.stop();
     super.onClose();
   }
 
-  void toggleRecording() async {
+  Future<void> toggleRecording() async {
     if (isRecording.value) {
       // Stop recording and process
       transcript.value = 'Processing…';
       await AssemblyAIService.stopRecording();
       isRecording.value = false;
+
+      // Wait a bit for transcript to be fully processed
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Only generate responses if we have actual transcript content
+      if (transcript.value.isNotEmpty && transcript.value != 'Processing…') {
+        await generateResponses();
+      }
     } else {
       // Start recording
       final hasPermission = await AssemblyAIService.initializeRecorder();
       if (hasPermission) {
+        // Clear previous response options when starting new recording
+        responseA.value = '';
+        responseB.value = '';
+        responseAText.value = '';
+        responseBText.value = '';
+        responseText.value = '';
+
         // Indicate listening
         transcript.value = 'Listening… Speak now';
 
@@ -87,11 +186,19 @@ class ConversationController extends GetxController {
     transcript.value = '';
     isRecording.value = false;
     AssemblyAIService.stopRecording();
+    // Clear response options when clearing transcript
+    responseA.value = '';
+    responseB.value = '';
+    responseAText.value = '';
+    responseBText.value = '';
+    responseText.value = '';
   }
 
   /// Generate responses using OpenAI based on transcript and personality
   Future<void> generateResponses() async {
-    if (transcript.value.isEmpty) {
+    print('generateResponses called with transcript: "${transcript.value}"');
+
+    if (transcript.value.isEmpty || transcript.value == 'Processing…') {
       responseText.value = 'No input provided.';
       return;
     }
@@ -102,6 +209,8 @@ class ConversationController extends GetxController {
         transcript: transcript.value,
         userProfile: userProfile.value,
       );
+
+      print('OpenAI returned options: $options');
 
       // Update response option titles
       responseA.value = options['optionA'] ?? 'Agree';
@@ -116,13 +225,16 @@ class ConversationController extends GetxController {
       // Default to first option
       responseText.value = responseAText.value;
       selectedTone.value = 'A';
+
+      print('Updated responses - A: ${responseA.value}, B: ${responseB.value}');
     } catch (e) {
       print('Error generating responses: $e');
       // Fallback to default responses
       responseA.value = 'Agree';
       responseB.value = 'Disagree';
       responseAText.value = 'I understand what you\'re saying.';
-      responseBText.value = 'I see it differently; could we consider alternatives?';
+      responseBText.value =
+          'I see it differently; could we consider alternatives?';
       responseText.value = responseAText.value;
     }
   }

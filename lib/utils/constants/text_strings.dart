@@ -154,4 +154,10 @@ class TTexts {
       "Unable to generate your profile. Please try again.";
   static const String quizTryAgain = "Try Again";
   static const String quizSkipForNow = "Skip for Now";
+
+  // -- Final Response Screen
+  static const String yourResponse = "Your Response";
+  static const String speakResponse = "Speak Response";
+  static const String stopSpeaking = "Stop Speaking";
+  static const String backToListening = "Back to Listening";
 }

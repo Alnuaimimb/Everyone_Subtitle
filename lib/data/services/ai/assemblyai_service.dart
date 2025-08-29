@@ -82,6 +82,7 @@ class AssemblyAIService {
   // Stop recording
   static Future<void> stopRecording() async {
     try {
+      print('[AssemblyAI] Stopping recording...');
       await _audioRecorder.stop();
       _stopPeriodicTranscription();
       if (_currentAudioPath != null &&
@@ -90,9 +91,11 @@ class AssemblyAIService {
         // Early check: ensure we captured enough audio
         final f = File(_currentAudioPath!);
         if (!(await f.exists()) || (await f.length()) < 8192) {
+          print('[AssemblyAI] Audio file too small or missing');
           _onErrorCb!.call('No audio captured. Try speaking a bit longer.');
           return;
         }
+        print('[AssemblyAI] Audio file size: ${await f.length()} bytes');
         // Finalize: upload once and poll until completed (short capped loop)
         await _transcribeAudioFile(
           audioPath: _currentAudioPath!,
@@ -229,13 +232,17 @@ class AssemblyAIService {
         final data = jsonDecode(response.body);
         final status = data['status'];
 
+        print('[AssemblyAI] Polling status: $status');
+
         if (status == 'completed') {
           final text = data['text'] ?? '';
+          print('[AssemblyAI] Transcription completed: "$text"');
           if (text.isNotEmpty) {
             onTranscriptUpdate(text);
           }
           return true;
         } else if (status == 'error') {
+          print('[AssemblyAI] Transcription error: ${data['error']}');
           onError('Transcription error: ${data['error']}');
           return true;
         }
@@ -243,6 +250,7 @@ class AssemblyAIService {
         throw Exception('Failed to get transcription: ${response.statusCode}');
       }
     } catch (e) {
+      print('[AssemblyAI] Polling error: $e');
       onError('Polling error: $e');
     }
     return false;

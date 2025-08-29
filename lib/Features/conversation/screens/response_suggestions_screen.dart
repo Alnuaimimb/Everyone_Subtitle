@@ -4,6 +4,7 @@ import 'package:everyone_subtitle/Features/conversation/controllers/conversation
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 import 'package:everyone_subtitle/utils/constants/image_strings.dart';
 import 'package:everyone_subtitle/Features/settings/screens/settings_screen.dart';
+import 'package:everyone_subtitle/Features/conversation/screens/final_response_screen.dart';
 
 /// Page 2: Shows a smaller, scrollable transcript card and a scrollable grid of responses.
 class ResponseSuggestionsScreen extends StatelessWidget {
@@ -78,9 +79,7 @@ class ResponseSuggestionsScreen extends StatelessWidget {
                             onPressed: controller.responseText.value.isEmpty
                                 ? null
                                 : () {
-                                    Get.snackbar(TTexts.proceed,
-                                        controller.responseText.value,
-                                        snackPosition: SnackPosition.BOTTOM);
+                                    Get.to(() => const FinalResponseScreen());
                                   },
                             child: const Text(TTexts.select),
                           )),

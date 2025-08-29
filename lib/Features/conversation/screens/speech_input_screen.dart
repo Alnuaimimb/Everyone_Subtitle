@@ -107,7 +107,10 @@ class SpeechInputScreen extends StatelessWidget {
                             tooltip: controller.isRecording.isTrue
                                 ? TTexts.pause
                                 : TTexts.record,
-                            onPressed: controller.toggleRecording,
+                            onPressed: () async {
+                              await controller.toggleRecording();
+                              // Stay on this page after stop; user will press Generate.
+                            },
                           )),
                       const SizedBox(width: 12),
                       // Reset circular
@@ -125,9 +128,12 @@ class SpeechInputScreen extends StatelessWidget {
                       _RoundActionButton(
                         icon: Icons.bug_report,
                         tooltip: 'Test',
-                        onPressed: () {
-                          controller.transcript.value =
-                              'Test transcript: Hello, this is a test message!';
+                        onPressed: () async {
+                          // Test API first
+                          await controller.testAPI();
+                          // Then test response generation
+                          controller.transcript.value = 'How are you today?';
+                          await controller.generateResponses();
                         },
                       ),
                       const SizedBox(width: 12),
@@ -136,10 +142,16 @@ class SpeechInputScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (controller.isRecording.value) {
-                              await AssemblyAIService.stopRecording();
-                              controller.isRecording.value = false;
+                              // Stop recording; controller will auto-generate.
+                              await controller.toggleRecording();
+                            } else {
+                              // Always generate responses if we have transcript
+                              if (controller.transcript.value.isNotEmpty &&
+                                  controller.transcript.value !=
+                                      'Listening... Speak now...') {
+                                await controller.generateResponses();
+                              }
                             }
-                            controller.generateResponses();
                             Get.to(() => const ResponseSuggestionsScreen());
                           },
                           style: ElevatedButton.styleFrom(
