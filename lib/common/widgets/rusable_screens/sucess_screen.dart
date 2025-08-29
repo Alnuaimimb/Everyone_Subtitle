@@ -27,11 +27,16 @@ class SucessScreen extends StatelessWidget {
           padding: TSpaceingStyle.paddingWithAppBarHeight * 2,
           child: Column(
             children: [
-              /// Image
-              Lottie.asset(
-                image,
-                width:
-                    (screenWidth > 500 ? screenWidth * 0.5 : screenWidth * 0.9),
+              /// Image / Animation
+              Builder(
+                builder: (_) {
+                  final lower = image.toLowerCase();
+                  final isLottie = lower.endsWith('.json');
+                  final width = (screenWidth > 500 ? screenWidth * 0.5 : screenWidth * 0.9);
+                  return isLottie
+                      ? Lottie.asset(image, width: width)
+                      : Image.asset(image, width: width, fit: BoxFit.contain);
+                },
               ),
 
               const SizedBox(height: TSizes.spaceBtwSections),

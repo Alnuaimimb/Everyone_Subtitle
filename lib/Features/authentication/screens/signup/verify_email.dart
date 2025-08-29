@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/authentication/controllers/signup/verify_email_controller.dart';
-import 'package:everyone_subtitle/common/widgets/rusable_screens/sucess_screen.dart';
-import 'package:everyone_subtitle/features/authentication/screens/login/login.dart';
+// import 'package:everyone_subtitle/common/widgets/rusable_screens/sucess_screen.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 import 'package:everyone_subtitle/utils/constants/image_strings.dart';
 import 'package:everyone_subtitle/utils/constants/sizes.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';

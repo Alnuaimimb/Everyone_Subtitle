@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:everyone_subtitle/features/authentication/screens/login/login.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 import 'package:everyone_subtitle/utils/constants/sizes.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 

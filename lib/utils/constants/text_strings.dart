@@ -5,11 +5,11 @@ class TTexts {
   static const String skip = "Skip";
   static const String done = "Done";
   static const String submit = "Submit";
-  static const String appName = "T-Store";
+  static const String appName = "everyone-subtitle";
   static const String tContinue = "Continue";
 
   // starter screen
-  static const String welcome = 'Everyone_subtitle';
+  static const String welcome = 'everyone-subtitle';
 // -- OnBoarding Texts
   static const String onBoardingTitle1 = "communicate easly";
   static const String onBoardingTitle2 = "make friends";
@@ -68,8 +68,13 @@ class TTexts {
   static const String popularProducts = "Popular Products";
 
   // -- Home
-  static const String homeAppbarTitle = "Good day for shopping";
+  static const String homeAppbarTitle = "everyone-subtitle";
   static const String homeAppbarSubTitle = "Mohamed Alnuaimi";
+  static const String homeGreeting = "Welcome back";
+  static const String personalityTitle = "Personality";
+  static const String personalityEmpty = "No personality summary available.";
+  static const String suggestedResponsesTitle = "Suggested Responses";
+  static const String noSuggestedResponses = "No suggested responses yet.";
 // -- Setting
   static const String settingAppbarTitle = "Account";
 

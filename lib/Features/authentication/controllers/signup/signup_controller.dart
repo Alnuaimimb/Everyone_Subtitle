@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/authentication/models/user_model.dart';
@@ -10,7 +10,6 @@ import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 import 'package:everyone_subtitle/utils/helpers/network_manager.dart';
 import 'package:everyone_subtitle/utils/popups/full_screen_loader.dart';
 import 'package:everyone_subtitle/utils/popups/loaders.dart';
-import 'package:everyone_subtitle/Features/authentication/screens/signup/verify_email.dart';
 
 class SignupController extends GetxController {
   static SignupController get instance => Get.find();
@@ -82,10 +81,8 @@ class SignupController extends GetxController {
           title: TTexts.Congratulatoions,
           message: TTexts.successfullSignUpMessage);
 
-      // redirect to verivication screen
-      Get.to(
-        VerifyEmail(email: FirebaseAuth.instance.currentUser!.email!),
-      );
+      // For MVP: go straight to Home via screenRedirect
+      AuthenticationRepository.instance.screenRedirect();
     } catch (error) {
       // show some generic error to the user
       TLoaders.warningSnackBar(title: 'Warrning', message: error.toString());

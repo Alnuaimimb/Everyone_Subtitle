@@ -5,11 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:everyone_subtitle/Features/authentication/controllers/signup/verify_email_controller.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/onboarding/onboarding.dart';
-import 'package:everyone_subtitle/Features/authentication/screens/signup/verify_email.dart';
-import 'package:everyone_subtitle/navigation_menue.dart';
+import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
 import 'package:everyone_subtitle/utils/exceptions/firebase_auth_exceptions.dart';
 import 'package:everyone_subtitle/utils/exceptions/firebase_exceptions.dart';
 import 'package:everyone_subtitle/utils/exceptions/format_exceptions.dart';
@@ -20,29 +18,23 @@ class AuthenticationRepository extends GetxController {
 
   final deviceStorage = GetStorage();
   final _auth = FirebaseAuth.instance;
-  final controller = Get.put(VerifyEmailController());
+  // Email verification is disabled for MVP; no verify controller needed
 
   @override
   void onReady() {
     super.onReady();
-    FlutterNativeSplash.remove(); // Remove splash screen
-    screenRedirect(); // Redirect to appropriate screen
+    FlutterNativeSplash.remove();
+    screenRedirect();
   }
 
   /// Function to show the relevant screen
   screenRedirect() async {
     debugPrint('Test begin');
     final user = _auth.currentUser;
-    // check if the user verfied
+    // For MVP: if user exists, go straight to Home.
     if (user != null) {
-      debugPrint('Test in 1');
-      if (user.emailVerified) {
-        debugPrint('Test in 2');
-        Get.offAll(() => const NavigationMenue());
-      } else {
-        debugPrint('Test in 3');
-        Get.offAll(VerifyEmail(email: user.email!));
-      }
+      debugPrint('User found, routing to Conversation');
+      Get.offAll(() => const SpeechInputScreen());
     } else {
       debugPrint('Test in 4');
       // check if the first time opening the app
@@ -82,7 +74,7 @@ class AuthenticationRepository extends GetxController {
   /// Email verification
   Future<void> sendEmailVerification() async {
     try {
-      _auth.currentUser!.sendEmailVerification();
+      await _auth.currentUser!.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       throw TFirebaseAuthException(e.code).message;
     } on FirebaseException catch (e) {

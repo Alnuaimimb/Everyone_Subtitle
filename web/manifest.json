@@ -1,6 +1,6 @@
 {
-    "name": "t_store",
-    "short_name": "t_store",
+    "name": "everyone-subtitle",
+    "short_name": "everyone-subtitle",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

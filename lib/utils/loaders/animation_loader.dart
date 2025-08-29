@@ -35,7 +35,17 @@ class TAnimationLoaderWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(animation, width: MediaQuery.of(context).size.width * 0.8), // Display Lottie animation
+          // Support both Lottie JSON and regular image/gif assets.
+          Builder(
+            builder: (_) {
+              final lower = animation.toLowerCase();
+              final isLottie = lower.endsWith('.json');
+              final width = MediaQuery.of(context).size.width * 0.8;
+              return isLottie
+                  ? Lottie.asset(animation, width: width)
+                  : Image.asset(animation, width: width, fit: BoxFit.contain);
+            },
+          ),
           const SizedBox(height: TSizes.defaultSpace),
           Text(
             text,

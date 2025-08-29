@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559651134968",
+    "project_id": "everyone-subtitle",
+    "storage_bucket": "everyone-subtitle.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559651134968:android:f03cc893bd701a371aca0d",
+        "android_client_info": {
+          "package_name": "com.everyonesubtitle.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRyNzIt5er-Fdsk5Fpip4ndb1H83wTNXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
