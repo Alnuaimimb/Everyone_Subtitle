@@ -96,4 +96,62 @@ class TTexts {
       "Your account has been created! verify email to continue";
   static const String successfullLogInMessage =
       "Welcome to Your Ultimate Shopping Destination";
+
+  // -- Conversation (New Pages)
+  static const String speechToTextTitle = "Speech to Text";
+  static const String transcriptPlaceholder =
+      "Start speaking to see the transcript here...";
+  static const String generate = "Generate";
+  static const String record = "Record";
+  static const String pause = "Pause";
+  static const String reset = "Reset";
+
+  static const String responsesTitle = "Suggested Responses";
+  static const String chooseOptionPrompt =
+      "Choose an option below to generate a response.";
+  static const String agree = "Agree";
+  static const String disagree = "Disagree";
+  static const String neutral = "Neutral";
+  static const String question = "Question";
+  static const String generateAnother = "Generate Another";
+  static const String proceed = "Proceed";
+  static const String custom = "Custom";
+  static const String cancel = "Cancel";
+  static const String ok = "OK";
+  static const String optionA = "A";
+  static const String optionB = "B";
+  static const String select = "Select";
+  static const String generateNewResponse = "Generate New Response";
+
+  // -- Quiz
+  static const String quizTitle = "Personality Quiz";
+  static const String quizIntroTitle = "Let's Get to Know You";
+  static const String quizIntroDescription =
+      "This quick 30-question quiz will help us understand your communication style and personality. We'll use this information to generate responses that match your natural way of speaking.";
+  static const String quizStartButton = "Start Quiz";
+  static const String quizExitButton = "Exit";
+  static const String quizPreviousButton = "Previous";
+  static const String quizNextButton = "Next";
+  static const String quizFinishButton = "Finish";
+  static const String quizSkipButton = "Skip";
+  static const String quizExitDialogTitle = "Exit Quiz?";
+  static const String quizExitDialogContent =
+      "Your progress will be lost. Are you sure you want to exit?";
+  static const String quizCancelButton = "Cancel";
+  static const String quizCompleteMessage =
+      "Please answer all questions or skip them to continue.";
+  static const String quizBuildingProfile = "Building Your Profile";
+  static const String quizAnalyzing = "Analyzing Your Responses...";
+  static const String quizAnalyzingDescription =
+      "We're creating your personalized communication profile. This will help us generate responses that match your natural speaking style.";
+  static const String quizProfileCreated = "Profile Created Successfully!";
+  static const String quizCommunicationStyle = "Your Communication Style";
+  static const String quizKeyTraits = "Key Traits";
+  static const String quizSpeakingStyle = "Speaking Style";
+  static const String quizStartUsingProfile = "Start Using Your Profile";
+  static const String quizErrorTitle = "Something went wrong";
+  static const String quizErrorDescription =
+      "Unable to generate your profile. Please try again.";
+  static const String quizTryAgain = "Try Again";
+  static const String quizSkipForNow = "Skip for Now";
 }

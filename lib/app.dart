@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
 import 'package:everyone_subtitle/bindings/general_bindings.dart';
 import 'package:everyone_subtitle/utils/theme/theme.dart';
+import 'package:everyone_subtitle/data/repositories/authentication/authentication_repository.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -14,7 +14,15 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.light,
       theme: TAppTheme.lightTheme,
       initialBinding: GeneralBindings(),
-      home: const SpeechInputScreen(),
+      home: const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      onReady: () {
+        // Let the auth repository handle routing
+        AuthenticationRepository.instance.screenRedirect();
+      },
     );
   }
 }

@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/conversation/controllers/conversation_controller.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/Features/conversation/screens/response_suggestions_screen.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/Features/settings/screens/settings_screen.dart';
+import 'package:everyone_subtitle/data/services/ai/assemblyai_service.dart';
 
 /// Page 1: Shows the speech-to-text card and controls row.
 class SpeechInputScreen extends StatelessWidget {
@@ -16,12 +20,33 @@ class SpeechInputScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: TColors.lightGrey,
-      appBar: AppBar(title: const Text('Speech to Text')),
+      appBar: AppBar(
+        title: const Text(TTexts.speechToTextTitle),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'settings') Get.to(() => const SettingsScreen());
+            },
+            itemBuilder: (ctx) => const [
+              PopupMenuItem(
+                  value: 'settings', child: Text(TTexts.settingAppbarTitle)),
+            ],
+            child: const Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: AssetImage(TImages.user),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const SizedBox(height: 12),
               // Transcript card - fills most of the screen
               Expanded(
                 child: Card(
@@ -38,15 +63,27 @@ class SpeechInputScreen extends StatelessWidget {
                     ),
                     child: Align(
                       alignment: Alignment.topLeft,
-                      child: Obx(() => Text(
-                            controller.transcript.value.isEmpty
-                                ? 'Start speaking to see the transcript here...'
-                                : controller.transcript.value,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(color: TColors.textPrimary),
-                          )),
+                      child: Obx(() {
+                        final transcriptText = controller.transcript.value;
+                        final isRecording = controller.isRecording.value;
+
+                        String displayText;
+                        if (transcriptText.isNotEmpty) {
+                          displayText = transcriptText;
+                        } else if (isRecording) {
+                          displayText = 'Listening... Speak now...';
+                        } else {
+                          displayText = TTexts.transcriptPlaceholder;
+                        }
+
+                        return Text(
+                          displayText,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: TColors.textPrimary),
+                        );
+                      }),
                     ),
                   ),
                 ),
@@ -67,28 +104,47 @@ class SpeechInputScreen extends StatelessWidget {
                             icon: controller.isRecording.isTrue
                                 ? Icons.pause
                                 : Icons.play_arrow,
+                            tooltip: controller.isRecording.isTrue
+                                ? TTexts.pause
+                                : TTexts.record,
                             onPressed: controller.toggleRecording,
                           )),
                       const SizedBox(width: 12),
                       // Reset circular
                       _RoundActionButton(
                         icon: Icons.refresh,
+                        tooltip: TTexts.reset,
                         onPressed: () {
                           controller.clearTranscript();
                           controller.isRecording.value = false;
+                        },
+                      ),
+
+                      // Test button (temporary)
+                      const SizedBox(width: 12),
+                      _RoundActionButton(
+                        icon: Icons.bug_report,
+                        tooltip: 'Test',
+                        onPressed: () {
+                          controller.transcript.value =
+                              'Test transcript: Hello, this is a test message!';
                         },
                       ),
                       const SizedBox(width: 12),
                       // Generate rectangular button fills remaining space
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            if (controller.isRecording.value) {
+                              await AssemblyAIService.stopRecording();
+                              controller.isRecording.value = false;
+                            }
                             controller.generateResponses();
                             Get.to(() => const ResponseSuggestionsScreen());
                           },
                           style: ElevatedButton.styleFrom(
                               minimumSize: const Size.fromHeight(56)),
-                          child: const Text('Generate'),
+                          child: const Text(TTexts.generate),
                         ),
                       ),
                     ],
@@ -104,13 +160,15 @@ class SpeechInputScreen extends StatelessWidget {
 }
 
 class _RoundActionButton extends StatelessWidget {
-  const _RoundActionButton({required this.icon, required this.onPressed});
+  const _RoundActionButton(
+      {required this.icon, required this.onPressed, this.tooltip});
   final IconData icon;
   final VoidCallback onPressed;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final button = SizedBox(
       width: 56,
       height: 56,
       child: ElevatedButton(
@@ -119,5 +177,6 @@ class _RoundActionButton extends StatelessWidget {
         child: Icon(icon),
       ),
     );
+    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
   }
 }

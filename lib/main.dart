@@ -10,6 +10,13 @@ Future<void> main() async {
   await GetStorage.init();
   await Firebase.initializeApp();
 
+  // Initialize GetX with proper configuration
+  Get.config(
+    enableLog: true,
+    defaultPopGesture: true,
+    defaultTransition: Transition.fade,
+  );
+
   // Make auth repo available and let it handle initial routing via onReady()
   Get.put(AuthenticationRepository(), permanent: true);
 

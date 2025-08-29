@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/conversation/controllers/conversation_controller.dart';
+import 'package:everyone_subtitle/utils/constants/text_strings.dart';
+import 'package:everyone_subtitle/utils/constants/image_strings.dart';
+import 'package:everyone_subtitle/Features/settings/screens/settings_screen.dart';
 
 /// Page 2: Shows a smaller, scrollable transcript card and a scrollable grid of responses.
 class ResponseSuggestionsScreen extends StatelessWidget {
@@ -13,32 +16,75 @@ class ResponseSuggestionsScreen extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Responses')),
+      appBar: AppBar(
+        title: const Text(TTexts.responsesTitle),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'settings') Get.to(() => const SettingsScreen());
+            },
+            itemBuilder: (ctx) => const [
+              PopupMenuItem(
+                  value: 'settings', child: Text(TTexts.settingAppbarTitle)),
+            ],
+            child: const Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: AssetImage(TImages.user),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const SizedBox(height: 12),
               // Top response card with scrollbar
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 child: Container(
-                  height: 180,
+                  height: 220,
                   padding: const EdgeInsets.all(16.0),
-                  child: Scrollbar(
-                    controller: scrollController,
-                    thumbVisibility: true,
-                    child: Obx(() => SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Scrollbar(
                           controller: scrollController,
-                          child: Text(
-                            controller.responseText.value.isEmpty
-                                ? 'Choose an option below to generate a response.'
-                                : controller.responseText.value,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        )),
+                          thumbVisibility: true,
+                          child: Obx(() => SingleChildScrollView(
+                                controller: scrollController,
+                                child: Text(
+                                  controller.responseText.value.isEmpty
+                                      ? TTexts.chooseOptionPrompt
+                                      : controller.responseText.value,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              )),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Obx(() => ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green.shade600,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: controller.responseText.value.isEmpty
+                                ? null
+                                : () {
+                                    Get.snackbar(TTexts.proceed,
+                                        controller.responseText.value,
+                                        snackPosition: SnackPosition.BOTTOM);
+                                  },
+                            child: const Text(TTexts.select),
+                          )),
+                    ],
                   ),
                 ),
               ),
@@ -48,73 +94,84 @@ class ResponseSuggestionsScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => controller.generateForTone('Agree'),
-                      child: const Text('A'),
-                    ),
+                    child: Obx(() => ElevatedButton(
+                          onPressed: () {
+                            controller.applyOptionA();
+                          },
+                          child: Text(
+                            controller.responseA.value.isEmpty
+                                ? 'Option A'
+                                : controller.responseA.value,
+                          ),
+                        )),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => controller.generateForTone('Disagree'),
-                      child: const Text('B'),
-                    ),
+                    child: Obx(() => ElevatedButton(
+                          onPressed: () {
+                            controller.applyOptionB();
+                          },
+                          child: Text(
+                            controller.responseB.value.isEmpty
+                                ? 'Option B'
+                                : controller.responseB.value,
+                          ),
+                        )),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
 
-              // Bottom actions: red and green buttons
+              // Bottom actions: centered Generate New Response and full-width Custom
               SafeArea(
                 top: false,
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          // Prompt for custom text
-                          final text = await showDialog<String>(
-                            context: context,
-                            builder: (ctx) {
-                              final TextEditingController tc =
-                                  TextEditingController();
-                              return AlertDialog(
-                                title: const Text('Custom'),
-                                content: TextField(controller: tc, maxLines: 3),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () => Navigator.pop(ctx),
-                                      child: const Text('Cancel')),
-                                  TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(ctx, tc.text.trim()),
-                                      child: const Text('OK')),
-                                ],
-                              );
-                            },
-                          );
-                          if (text != null && text.isNotEmpty) {
-                            controller.responseText.value = text;
-                          }
-                        },
-                        child: const Text('Custom'),
+                    Center(
+                      child: SizedBox(
+                        width: 260,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade600,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () async {
+                            await controller.generateResponses();
+                          },
+                          child: const Text(TTexts.generateNewResponse),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (controller.responseText.value.isEmpty) {
-                            Get.snackbar('Select', 'Choose an option first',
-                                snackPosition: SnackPosition.BOTTOM);
-                          } else {
-                            Get.snackbar(
-                                'Selected', controller.responseText.value,
-                                snackPosition: SnackPosition.BOTTOM);
-                          }
-                        },
-                        child: const Text('Generate'),
-                      ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () async {
+                        // Prompt for custom text
+                        final text = await showDialog<String>(
+                          context: context,
+                          builder: (ctx) {
+                            final TextEditingController tc =
+                                TextEditingController();
+                            return AlertDialog(
+                              title: const Text(TTexts.custom),
+                              content: TextField(controller: tc, maxLines: 3),
+                              actions: [
+                                TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text(TTexts.cancel)),
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(ctx, tc.text.trim()),
+                                    child: const Text(TTexts.ok)),
+                              ],
+                            );
+                          },
+                        );
+                        if (text != null && text.isNotEmpty) {
+                          controller.responseText.value = text;
+                        }
+                      },
+                      child: const Text(TTexts.custom),
                     ),
                   ],
                 ),

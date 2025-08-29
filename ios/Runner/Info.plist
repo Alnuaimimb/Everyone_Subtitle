@@ -4,9 +4,11 @@
 	<dict>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
-		<key>CFBundleDisplayName</key>
-		<string>everyone-subtitle</string>
-		<key>CFBundleExecutable</key>
+			<key>CFBundleDisplayName</key>
+	<string>everyone-subtitle</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to microphone to record speech for transcription.</string>
+	<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>

@@ -1,4 +1,8 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:everyone_subtitle/Features/quiz/models/user_profile.dart';
+import 'package:everyone_subtitle/data/services/ai/assemblyai_service.dart';
+import 'package:everyone_subtitle/data/services/ai/openai_service.dart';
 
 /// Controls the shared state between the conversation pages.
 /// Holds the transcript (speech-to-text), recording state, and generated responses.
@@ -7,19 +11,71 @@ class ConversationController extends GetxController {
 
   final RxString transcript = ''.obs;
   final RxBool isRecording = false.obs;
-  final RxList<String> responses = <String>[].obs; // legacy mock list (unused in new UI)
-  final RxInt selectedResponseIndex = (-1).obs;   // legacy selection (unused in new UI)
-  final RxString responseText = ''.obs;           // current generated/selected response
-  final RxString selectedTone = ''.obs;           // Agree/Disagree/Neutral/Question
+  final RxList<String> responses =
+      <String>[].obs; // legacy mock list (unused in new UI)
+  final RxInt selectedResponseIndex =
+      (-1).obs; // legacy selection (unused in new UI)
+  final RxString responseText = ''.obs; // current generated/selected response
+  final RxString selectedTone = ''.obs; // Agree/Disagree/Neutral/Question
+  final Rx<UserProfile?> userProfile = Rx<UserProfile?>(null);
+  final RxString responseA = ''.obs; // candidate for A (Agree)
+  final RxString responseB = ''.obs; // candidate for B (Disagree)
+  final RxString responseAText = ''.obs; // full text for option A
+  final RxString responseBText = ''.obs; // full text for option B
+  final RxInt _indexA = (-1).obs; // rotation index for A
+  final RxInt _indexB = (-1).obs; // rotation index for B
 
-  void toggleRecording() {
-    isRecording.toggle();
-    // Placeholder UX: when recording starts, seed some example text.
-    if (isRecording.isTrue && transcript.value.isEmpty) {
-      transcript.value = 'Listening... start speaking to fill transcript.';
+  @override
+  void onInit() {
+    super.onInit();
+    _loadUserProfile();
+  }
+
+  void _loadUserProfile() {
+    try {
+      final storage = GetStorage();
+      final profileData = storage.read('userProfile');
+      if (profileData != null) {
+        userProfile.value = UserProfile.fromJson(profileData);
+      }
+    } catch (e) {
+      print('Error loading user profile: $e');
     }
-    if (isRecording.isFalse && transcript.value.startsWith('Listening...')) {
-      transcript.value = 'Hello, I would like to schedule a meeting tomorrow at 10 AM.';
+  }
+
+  @override
+  void onClose() {
+    AssemblyAIService.dispose();
+    super.onClose();
+  }
+
+  void toggleRecording() async {
+    if (isRecording.value) {
+      // Stop recording and process
+      transcript.value = 'Processing…';
+      await AssemblyAIService.stopRecording();
+      isRecording.value = false;
+    } else {
+      // Start recording
+      final hasPermission = await AssemblyAIService.initializeRecorder();
+      if (hasPermission) {
+        // Indicate listening
+        transcript.value = 'Listening… Speak now';
+
+        await AssemblyAIService.startRecording(
+          onTranscriptUpdate: (text) {
+            print('Transcript update: $text'); // Debug log
+            transcript.value = text;
+          },
+          onError: (error) {
+            // Surface error to the UI so user understands what's happening
+            transcript.value = error;
+          },
+        );
+        isRecording.value = true;
+      } else {
+        print('No microphone permission');
+      }
     }
   }
 
@@ -29,32 +85,58 @@ class ConversationController extends GetxController {
 
   void clearTranscript() {
     transcript.value = '';
+    isRecording.value = false;
+    AssemblyAIService.stopRecording();
   }
 
-  /// Mock generation until API is connected.
-  void generateResponses() {
-    final base = transcript.value.isEmpty
-        ? 'No input provided.'
-        : transcript.value;
-    responses.assignAll(<String>[
-      'Sure, tomorrow 10 AM works for me.',
-      'Can we do 10:30 AM instead?',
-      'I am unavailable tomorrow, how about Friday?',
-      'Let’s meet online via Zoom.',
-      'Please share the agenda beforehand.',
-      'Sounds good, see you then!',
-    ]);
-    selectedResponseIndex.value = -1;
+  /// Generate responses using OpenAI based on transcript and personality
+  Future<void> generateResponses() async {
+    if (transcript.value.isEmpty) {
+      responseText.value = 'No input provided.';
+      return;
+    }
+
+    try {
+      // Generate response options using OpenAI
+      final options = await OpenAIService.generateResponseOptions(
+        transcript: transcript.value,
+        userProfile: userProfile.value,
+      );
+
+      // Update response option titles
+      responseA.value = options['optionA'] ?? 'Agree';
+      responseB.value = options['optionB'] ?? 'Disagree';
+
+      // Update full texts
+      responseAText.value =
+          options['responseA'] ?? 'I understand what you\'re saying.';
+      responseBText.value =
+          options['responseB'] ?? 'Could you clarify a bit more?';
+
+      // Default to first option
+      responseText.value = responseAText.value;
+      selectedTone.value = 'A';
+    } catch (e) {
+      print('Error generating responses: $e');
+      // Fallback to default responses
+      responseA.value = 'Agree';
+      responseB.value = 'Disagree';
+      responseAText.value = 'I understand what you\'re saying.';
+      responseBText.value = 'I see it differently; could we consider alternatives?';
+      responseText.value = responseAText.value;
+    }
   }
+
+  // Legacy responses list kept for backward compatibility (not used by new UI)
 
   void selectResponse(int index) {
     selectedResponseIndex.value = index;
   }
 
-  String? get selectedResponse =>
-      selectedResponseIndex.value >= 0 && selectedResponseIndex.value < responses.length
-          ? responses[selectedResponseIndex.value]
-          : null;
+  String? get selectedResponse => selectedResponseIndex.value >= 0 &&
+          selectedResponseIndex.value < responses.length
+      ? responses[selectedResponseIndex.value]
+      : null;
 
   // New tone-based mock responses for Page 2
   static const _toneKeys = ['Agree', 'Disagree', 'Neutral', 'Question'];
@@ -84,7 +166,40 @@ class ConversationController extends GetxController {
   void generateForTone(String tone) {
     selectedTone.value = tone;
     final list = _toneResponses[tone] ?? _toneResponses['Neutral']!;
-    responseText.value = list.first;
+
+    // If user profile exists, try to personalize the response
+    if (userProfile.value != null) {
+      final profile = userProfile.value!;
+      final baseResponse = list.first;
+
+      // Simple personalization based on speaking style
+      String personalizedResponse = baseResponse;
+
+      if (profile.speakingStyle.toLowerCase().contains('formal')) {
+        personalizedResponse = baseResponse
+            .replaceAll("I'm", "I am")
+            .replaceAll("don't", "do not");
+      } else if (profile.speakingStyle.toLowerCase().contains('casual')) {
+        personalizedResponse = baseResponse
+            .replaceAll("I am", "I'm")
+            .replaceAll("do not", "don't");
+      }
+
+      // Add personality traits if they suggest empathy
+      if (profile.traits.any((trait) =>
+          trait.toLowerCase().contains('empathetic') ||
+          trait.toLowerCase().contains('caring'))) {
+        if (!personalizedResponse.contains('understand') &&
+            !personalizedResponse.contains('feel')) {
+          personalizedResponse =
+              "I understand how you feel. $personalizedResponse";
+        }
+      }
+
+      responseText.value = personalizedResponse;
+    } else {
+      responseText.value = list.first;
+    }
   }
 
   void regenerateForCurrentTone() {
@@ -96,5 +211,32 @@ class ConversationController extends GetxController {
       final idx = (list.indexOf(current) + 1) % list.length;
       responseText.value = list[idx];
     }
+  }
+
+  /// Refresh both A and B candidates to new variants.
+  void refreshAB() {
+    // Agree track
+    final agreeList = _toneResponses['Agree']!;
+    _indexA.value = (_indexA.value + 1) % agreeList.length;
+    responseA.value = agreeList[_indexA.value];
+
+    // Disagree track
+    final disagreeList = _toneResponses['Disagree']!;
+    _indexB.value = (_indexB.value + 1) % disagreeList.length;
+    responseB.value = disagreeList[_indexB.value];
+  }
+
+  void applyOptionA() {
+    if (responseA.value.isEmpty) refreshAB();
+    selectedTone.value = 'Agree';
+    responseText.value =
+        responseAText.value.isNotEmpty ? responseAText.value : responseA.value;
+  }
+
+  void applyOptionB() {
+    if (responseB.value.isEmpty) refreshAB();
+    selectedTone.value = 'Disagree';
+    responseText.value =
+        responseBText.value.isNotEmpty ? responseBText.value : responseB.value;
   }
 }

@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/onboarding/onboarding.dart';
 import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
+import 'package:everyone_subtitle/Features/quiz/screens/quiz_intro_screen.dart';
 import 'package:everyone_subtitle/utils/exceptions/firebase_auth_exceptions.dart';
 import 'package:everyone_subtitle/utils/exceptions/firebase_exceptions.dart';
 import 'package:everyone_subtitle/utils/exceptions/format_exceptions.dart';
@@ -31,21 +32,30 @@ class AuthenticationRepository extends GetxController {
   screenRedirect() async {
     debugPrint('Test begin');
     final user = _auth.currentUser;
-    // For MVP: if user exists, go straight to Home.
+
     if (user != null) {
-      debugPrint('User found, routing to Conversation');
-      Get.offAll(() => const SpeechInputScreen());
+      debugPrint('User found, checking quiz completion');
+
+      // Check if user has completed the quiz
+      final hasCompletedQuiz = deviceStorage.read('hasCompletedQuiz') ?? false;
+
+      if (hasCompletedQuiz) {
+        debugPrint('Quiz completed, routing to Conversation');
+        Get.offAll(() => const SpeechInputScreen());
+      } else {
+        debugPrint('Quiz not completed, routing to Quiz');
+        Get.offAll(() => const QuizIntroScreen());
+      }
     } else {
-      debugPrint('Test in 4');
+      debugPrint('No user, checking first time');
       // check if the first time opening the app
       await deviceStorage.writeIfNull('IsFirstTime', true);
       bool isFirstTime = deviceStorage.read('IsFirstTime');
       if (isFirstTime != true) {
-        debugPrint('Test in 5');
+        debugPrint('Not first time, routing to Login');
         Get.offAll(() => const LoginScreen());
       } else {
-        debugPrint('Test in 16');
-
+        debugPrint('First time, routing to Onboarding');
         Get.off(() => const onBoardingScreen());
       }
     }
