@@ -118,8 +118,7 @@ class TTexts {
   static const String custom = "Custom";
   static const String cancel = "Cancel";
   static const String ok = "OK";
-  static const String optionA = "A";
-  static const String optionB = "B";
+
   static const String select = "Select";
   static const String generateNewResponse = "Generate New Response";
 
@@ -160,4 +159,5 @@ class TTexts {
   static const String speakResponse = "Speak Response";
   static const String stopSpeaking = "Stop Speaking";
   static const String backToListening = "Back to Listening";
+  static const String changeResponse = "Change Response";
 }

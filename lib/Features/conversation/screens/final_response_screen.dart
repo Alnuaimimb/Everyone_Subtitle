@@ -2,26 +2,74 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/conversation/controllers/conversation_controller.dart';
 import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
+import 'package:everyone_subtitle/data/services/ai/tts_service.dart';
+import 'package:everyone_subtitle/data/services/profile/profile_improvement_service.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
-class FinalResponseScreen extends StatelessWidget {
+class FinalResponseScreen extends StatefulWidget {
   const FinalResponseScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<ConversationController>();
+  State<FinalResponseScreen> createState() => _FinalResponseScreenState();
+}
 
+class _FinalResponseScreenState extends State<FinalResponseScreen> {
+  final ConversationController controller = Get.find<ConversationController>();
+  bool isSpeaking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTTS();
+  }
+
+  Future<void> _initializeTTS() async {
+    await TTSService.initialize();
+  }
+
+  Future<void> _speakResponse() async {
+    if (isSpeaking) {
+      await TTSService.stop();
+      setState(() {
+        isSpeaking = false;
+      });
+    } else {
+      setState(() {
+        isSpeaking = true;
+      });
+
+      await TTSService.speak(controller.responseText.value);
+
+      // Reset speaking state after a delay
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            isSpeaking = false;
+          });
+        }
+      });
+    }
+  }
+
+  void _saveResponseChoice() {
+    ProfileImprovementService.saveResponseChoice(
+      transcript: controller.transcript.value,
+      selectedResponse: controller.responseText.value,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.lightGrey,
       appBar: AppBar(
         title: const Text('Your Response'),
-        backgroundColor: TColors.lightGrey,
-        elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -29,11 +77,8 @@ class FinalResponseScreen extends StatelessWidget {
               Expanded(
                 child: Card(
                   elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -42,119 +87,121 @@ class FinalResponseScreen extends StatelessWidget {
                             Icon(
                               Icons.message,
                               color: TColors.primary,
-                              size: 28,
+                              size: 24,
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Text(
-                              'Your Response',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: TColors.textPrimary,
-                              ),
+                              TTexts.yourResponse,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: TColors.textPrimary,
+                                  ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Expanded(
-                          child: Obx(() => Text(
-                            controller.responseText.value.isEmpty 
-                                ? 'No response selected' 
-                                : controller.responseText.value,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontSize: 18,
-                              height: 1.5,
-                              color: TColors.textPrimary,
-                            ),
-                          )),
+                          child: SingleChildScrollView(
+                            child: Obx(() => Text(
+                                  controller.responseText.value.isEmpty
+                                      ? 'No response selected'
+                                      : controller.responseText.value,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: TColors.textPrimary,
+                                        height: 1.5,
+                                      ),
+                                )),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
-              // Action Buttons
-              SafeArea(
-                top: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Speak Button
-                    Obx(() => ElevatedButton(
-                      onPressed: controller.responseText.value.isEmpty
-                          ? null
-                          : () async {
-                              await controller.speakResponse();
-                            },
+
+              // TTS Button
+              SizedBox(
+                height: 64,
+                child: ElevatedButton.icon(
+                  onPressed: _speakResponse,
+                  icon: Icon(
+                    isSpeaking ? Icons.stop : Icons.volume_up,
+                    size: 28,
+                  ),
+                  label: Text(
+                    isSpeaking ? TTexts.stopSpeaking : TTexts.speakResponse,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSpeaking ? Colors.red : TColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Navigation Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _saveResponseChoice();
+                        Get.offAll(() => const SpeechInputScreen());
+                      },
+                      icon: const Icon(Icons.mic),
+                      label: const Text(TTexts.backToListening),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _saveResponseChoice();
+                        Get.back(); // Go back to response suggestions
+                      },
+                      icon: const Icon(Icons.edit),
+                      label: const Text(TTexts.changeResponse),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.primary,
+                        backgroundColor: TColors.secondary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Obx(() => Icon(
-                            controller.isSpeaking.value ? Icons.stop : Icons.volume_up,
-                            size: 24,
-                          )),
-                          const SizedBox(width: 12),
-                          Obx(() => Text(
-                            controller.isSpeaking.value ? 'Stop Speaking' : 'Speak Response',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          )),
-                        ],
-                      ),
-                    )),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Back to Listening Button
-                    OutlinedButton(
-                      onPressed: () {
-                        // Save response to history and improve profile
-                        controller.saveResponseToHistory();
-                        // Navigate back to speech input
-                        Get.offAll(() => const SpeechInputScreen());
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: TColors.primary,
-                        side: BorderSide(color: TColors.primary),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.hearing, size: 24),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Back to Listening',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    TTSService.stop();
+    super.dispose();
   }
 }

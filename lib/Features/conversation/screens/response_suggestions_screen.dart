@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/conversation/controllers/conversation_controller.dart';
+import 'package:everyone_subtitle/Features/conversation/screens/final_response_screen.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 import 'package:everyone_subtitle/utils/constants/image_strings.dart';
 import 'package:everyone_subtitle/Features/settings/screens/settings_screen.dart';
-import 'package:everyone_subtitle/Features/conversation/screens/final_response_screen.dart';
+import 'package:everyone_subtitle/data/services/profile/profile_improvement_service.dart';
 
 /// Page 2: Shows a smaller, scrollable transcript card and a scrollable grid of responses.
 class ResponseSuggestionsScreen extends StatelessWidget {
@@ -79,6 +80,13 @@ class ResponseSuggestionsScreen extends StatelessWidget {
                             onPressed: controller.responseText.value.isEmpty
                                 ? null
                                 : () {
+                                    final text = controller.responseText.value;
+                                    // Save response choice for profile improvement
+                                    ProfileImprovementService
+                                        .saveResponseChoice(
+                                      transcript: controller.transcript.value,
+                                      selectedResponse: text,
+                                    );
                                     Get.to(() => const FinalResponseScreen());
                                   },
                             child: const Text(TTexts.select),
@@ -89,36 +97,7 @@ class ResponseSuggestionsScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 8),
-              // A/B row like wireframe
-              Row(
-                children: [
-                  Expanded(
-                    child: Obx(() => ElevatedButton(
-                          onPressed: () {
-                            controller.applyOptionA();
-                          },
-                          child: Text(
-                            controller.responseA.value.isEmpty
-                                ? 'Option A'
-                                : controller.responseA.value,
-                          ),
-                        )),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Obx(() => ElevatedButton(
-                          onPressed: () {
-                            controller.applyOptionB();
-                          },
-                          child: Text(
-                            controller.responseB.value.isEmpty
-                                ? 'Option B'
-                                : controller.responseB.value,
-                          ),
-                        )),
-                  ),
-                ],
-              ),
+              // Removed A/B option buttons — single response flow
               const SizedBox(height: 12),
 
               // Bottom actions: centered Generate New Response and full-width Custom

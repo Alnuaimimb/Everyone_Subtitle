@@ -29,6 +29,8 @@ class AssemblyAIService {
   static String? _currentAudioPath;
   static Function(String)? _onTranscriptCb;
   static Function(String)? _onErrorCb;
+  static bool _isRecording = false;
+  static bool _isStopping = false;
 
   // Initialize audio recorder
   static Future<bool> initializeRecorder() async {
@@ -60,6 +62,7 @@ class AssemblyAIService {
       final audioPath = '${tempDir.path}/temp_audio.wav';
       _currentAudioPath = audioPath;
 
+      if (_isRecording) return; // Prevent double start
       // Start recording
       await _audioRecorder.start(
         RecordConfig(
@@ -72,6 +75,7 @@ class AssemblyAIService {
 
       // Show immediate feedback
       onTranscriptUpdate('Listening... Speak now...');
+      _isRecording = true;
 
       // We now transcribe only when the user stops the recording for reliability.
     } catch (e) {
@@ -82,8 +86,12 @@ class AssemblyAIService {
   // Stop recording
   static Future<void> stopRecording() async {
     try {
+      if (_isStopping) return;
+      _isStopping = true;
       print('[AssemblyAI] Stopping recording...');
-      await _audioRecorder.stop();
+      if (_isRecording) {
+        await _audioRecorder.stop();
+      }
       _stopPeriodicTranscription();
       if (_currentAudioPath != null &&
           _onTranscriptCb != null &&
@@ -106,6 +114,8 @@ class AssemblyAIService {
     } catch (e) {
       print('Error stopping recording: $e');
     }
+    _isRecording = false;
+    _isStopping = false;
   }
 
   // Start periodic transcription
@@ -265,5 +275,7 @@ class AssemblyAIService {
   static void dispose() {
     _pollingTimer?.cancel();
     _audioRecorder.dispose();
+    _isRecording = false;
+    _isStopping = false;
   }
 }

@@ -6,7 +6,6 @@ import 'package:everyone_subtitle/Features/conversation/screens/response_suggest
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 import 'package:everyone_subtitle/utils/constants/image_strings.dart';
 import 'package:everyone_subtitle/Features/settings/screens/settings_screen.dart';
-import 'package:everyone_subtitle/data/services/ai/assemblyai_service.dart';
 
 /// Page 1: Shows the speech-to-text card and controls row.
 class SpeechInputScreen extends StatelessWidget {
@@ -129,9 +128,7 @@ class SpeechInputScreen extends StatelessWidget {
                         icon: Icons.bug_report,
                         tooltip: 'Test',
                         onPressed: () async {
-                          // Test API first
-                          await controller.testAPI();
-                          // Then test response generation
+                          // Test single response generation
                           controller.transcript.value = 'How are you today?';
                           await controller.generateResponses();
                         },
@@ -142,10 +139,10 @@ class SpeechInputScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (controller.isRecording.value) {
-                              // Stop recording; controller will auto-generate.
+                              // Stop recording; user will generate on next step.
                               await controller.toggleRecording();
                             } else {
-                              // Always generate responses if we have transcript
+                              // Generate single response if we have transcript
                               if (controller.transcript.value.isNotEmpty &&
                                   controller.transcript.value !=
                                       'Listening... Speak now...') {
