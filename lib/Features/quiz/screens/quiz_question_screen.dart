@@ -68,10 +68,10 @@ class QuizQuestionScreen extends StatelessWidget {
                           final controller = Get.find<QuizController>();
                           return Text(
                             controller.currentQuestion.text,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontSize: 20,
                                   color: TColors.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -108,8 +108,13 @@ class QuizQuestionScreen extends StatelessWidget {
                           backgroundColor: Colors.white,
                           foregroundColor: TColors.textPrimary,
                           side: BorderSide(color: TColors.borderPrimary),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          minimumSize: const Size(96, 40),
                         ),
-                        child: const Text('Previous'),
+                        child: const Text(
+                          'Previous',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
                       );
                     }),
 
@@ -118,7 +123,10 @@ class QuizQuestionScreen extends StatelessWidget {
                     // Skip button (no Rx needed)
                     TextButton(
                       onPressed: Get.find<QuizController>().skipQuestion,
-                      child: const Text('Skip'),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
                     ),
 
                     const SizedBox(width: 12),
@@ -135,9 +143,13 @@ class QuizQuestionScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: TColors.primary,
                           foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          minimumSize: const Size(96, 40),
                         ),
-                        child:
-                            Text(controller.isLastQuestion ? 'Finish' : 'Next'),
+                        child: Text(
+                          controller.isLastQuestion ? 'Finish' : 'Next',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
                       );
                     }),
                   ],
@@ -191,10 +203,10 @@ class QuizQuestionScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           option,
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: TColors.textPrimary,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontSize: 16,
+                                color: TColors.textPrimary,
+                              ),
                         ),
                       ),
                     ],
@@ -256,10 +268,10 @@ class QuizQuestionScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           option,
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: TColors.textPrimary,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontSize: 16,
+                                color: TColors.textPrimary,
+                              ),
                         ),
                       ),
                     ],

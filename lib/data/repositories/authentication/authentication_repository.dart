@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
@@ -25,7 +24,6 @@ class AuthenticationRepository extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    FlutterNativeSplash.remove();
     screenRedirect();
   }
 

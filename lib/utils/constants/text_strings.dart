@@ -62,7 +62,7 @@ class TTexts {
   static const String yourAccountCreatedTitle =
       "Your account successfully created!";
   static const String yourAccountCreatedSubTitle =
-      "Welcome to Your Ultimate Shopping Destination: Your Account is Created, Unleash the Joy of Seamless Online Shopping!";
+      "Welcome to your new voice";
 
   // -- Product
   static const String popularProducts = "Popular Products";
@@ -95,7 +95,7 @@ class TTexts {
   static const String successfullSignUpMessage =
       "Your account has been created! verify email to continue";
   static const String successfullLogInMessage =
-      "Welcome to Your Ultimate Shopping Destination";
+      "Welcome to your new voice";
 
   // -- Conversation (New Pages)
   static const String speechToTextTitle = "Speech to Text";
