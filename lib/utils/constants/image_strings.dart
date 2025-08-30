@@ -33,11 +33,11 @@ class TImages {
 
   // -- OnBoarding Texts
   static const String onBoardingImage1 =
-      "assets/images/on_boarding_images/communicate.gif";
+      "assets/images/on_boarding_images/welcome.gif";
   static const String onBoardingImage2 =
       "assets/images/on_boarding_images/meetFriends.gif";
   static const String onBoardingImage3 =
-      "assets/images/on_boarding_images/hobies.gif";
+      "assets/images/on_boarding_images/explore.gif";
 
   //Profile
   static const String user = "assets/images/content/user.png";

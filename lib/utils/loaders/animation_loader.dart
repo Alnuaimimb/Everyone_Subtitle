@@ -35,16 +35,18 @@ class TAnimationLoaderWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Support both Lottie JSON and regular image/gif assets.
-          Builder(
-            builder: (_) {
-              final lower = animation.toLowerCase();
-              final isLottie = lower.endsWith('.json');
-              final width = MediaQuery.of(context).size.width * 0.8;
-              return isLottie
-                  ? Lottie.asset(animation, width: width)
-                  : Image.asset(animation, width: width, fit: BoxFit.contain);
-            },
+          // Simple loading circle instead of image/animation
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: TColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const CircularProgressIndicator(
+              strokeWidth: 4,
+              valueColor: AlwaysStoppedAnimation<Color>(TColors.primary),
+            ),
           ),
           const SizedBox(height: TSizes.defaultSpace),
           Text(
@@ -58,10 +60,14 @@ class TAnimationLoaderWidget extends StatelessWidget {
                   width: 250,
                   child: OutlinedButton(
                     onPressed: onActionPressed,
-                    style: OutlinedButton.styleFrom(backgroundColor: TColors.dark),
+                    style:
+                        OutlinedButton.styleFrom(backgroundColor: TColors.dark),
                     child: Text(
                       actionText!,
-                      style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.light),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .apply(color: TColors.light),
                     ),
                   ),
                 )

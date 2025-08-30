@@ -25,6 +25,7 @@ class onBoardingController extends GetxController {
   // update current index and jump to the next page
   void nextPage() {
     if (currentPageIndex.value == 2) {
+      debugPrint('Onboarding completed, setting IsFirstTime to false');
       deviceStorage.write('IsFirstTime', false);
       Get.offAll(const LoginScreen());
     } else {
@@ -37,5 +38,11 @@ class onBoardingController extends GetxController {
   void skipPage() {
     currentPageIndex.value = 2;
     pageController.jumpToPage(2);
+  }
+
+  // Reset first time flag for testing (can be called from settings or debug)
+  void resetFirstTimeFlag() {
+    deviceStorage.write('IsFirstTime', true);
+    debugPrint('IsFirstTime reset to true');
   }
 }

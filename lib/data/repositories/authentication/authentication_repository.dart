@@ -74,13 +74,16 @@ class AuthenticationRepository extends GetxController {
       debugPrint('No user, checking first time');
       // check if the first time opening the app
       await deviceStorage.writeIfNull('IsFirstTime', true);
-      bool isFirstTime = deviceStorage.read('IsFirstTime');
-      if (isFirstTime != true) {
-        debugPrint('Not first time, routing to Login');
-        Get.offAll(() => const LoginScreen());
-      } else {
+      var isFirstTime = deviceStorage.read('IsFirstTime');
+      debugPrint(
+          'IsFirstTime value: $isFirstTime (type: ${isFirstTime.runtimeType})');
+
+      if (isFirstTime == true) {
         debugPrint('First time, routing to Onboarding');
         Get.off(() => const onBoardingScreen());
+      } else {
+        debugPrint('Not first time, routing to Login');
+        Get.offAll(() => const LoginScreen());
       }
     }
   }
@@ -122,6 +125,23 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
+  /// Password reset
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw TFirebaseAuthException(e.code).message;
+    } on FirebaseException catch (e) {
+      throw TFirebaseException(e.code).message;
+    } on FormatException catch (_) {
+      throw const TFormatException();
+    } on PlatformException catch (e) {
+      throw TPlatformException(e.code).message;
+    } catch (e) {
+      throw 'Something went Wrong';
+    }
+  }
+
   /// Logout functuin
   Future<void> logout() async {
     try {
@@ -154,5 +174,11 @@ class AuthenticationRepository extends GetxController {
     } catch (e) {
       throw 'Somthing went Wrong';
     }
+  }
+
+  /// Reset first time flag for testing (can be called from settings or debug)
+  Future<void> resetFirstTimeFlag() async {
+    await deviceStorage.remove('IsFirstTime');
+    debugPrint('IsFirstTime flag removed, will show onboarding on next app launch');
   }
 }

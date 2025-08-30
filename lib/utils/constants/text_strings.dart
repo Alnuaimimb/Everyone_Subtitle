@@ -11,17 +11,15 @@ class TTexts {
   // starter screen
   static const String welcome = 'everyone-subtitle';
 // -- OnBoarding Texts
-  static const String onBoardingTitle1 = "communicate easly";
-  static const String onBoardingTitle2 = "make friends";
-  static const String onBoardingTitle3 = "explore the world";
+  static const String onBoardingTitle1 = "Welcome!";
+  static const String onBoardingTitle2 = "Everyone Subtitle";
+  static const String onBoardingTitle3 = "Are you ready?";
 
-  static const String onBoardingSubTitle1 =
-      "choose the best AI voice and make it yours ";
+  static const String onBoardingSubTitle1 = "Are you ready to communicate?";
   static const String onBoardingSubTitle2 =
-      "Connect with like-minded people with more confident";
+      "Performative AI communication app with interactive voices";
   static const String onBoardingSubTitle3 =
-      "No more limits on where you can go or with whome you can speak";
-
+      "It's time for you to explore the world";
   // -- Authentication Forms
   static const String firstName = "First Name";
   static const String lastName = "Last Name";
