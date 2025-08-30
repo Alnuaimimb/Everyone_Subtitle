@@ -390,14 +390,14 @@ class _RoundActionButton extends StatelessWidget {
           shape: const CircleBorder(),
           backgroundColor: onPressed == null
               ? Colors.grey.shade400 // Gray when disabled
-              : null, // Default color when enabled
+              : TColors.primary, // Solid primary when enabled
           foregroundColor: onPressed == null
               ? Colors.grey.shade600 // Gray icon when disabled
-              : null, // Default color when enabled
+              : Colors.white70, // Lighter shade for enabled icon
         ),
         child: Icon(
           icon,
-          color: onPressed == null ? Colors.grey.shade600 : null,
+          color: onPressed == null ? Colors.grey.shade600 : Colors.white70,
         ),
       ),
     );
