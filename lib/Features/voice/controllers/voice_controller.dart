@@ -12,6 +12,7 @@ class VoiceController extends GetxController {
   final Rx<VoiceModel?> selectedVoice = Rx<VoiceModel?>(null);
   final List<VoiceModel> availableVoices = VoiceConstants.availableVoices;
   final FlutterTts _tts = FlutterTts();
+  final RxBool isPreviewing = false.obs;
 
   @override
   void onInit() {
@@ -41,19 +42,33 @@ class VoiceController extends GetxController {
 
   Future<void> previewVoice(VoiceModel voice) async {
     selectVoice(voice);
+    isPreviewing.value = true;
+
     try {
+      // Stop any current speech first
+      await _tts.stop();
+
+      // Configure TTS settings
       await _tts.setLanguage('en-US');
       await _tts.setSpeechRate(voice.speechRate);
       await _tts.setPitch(voice.pitch);
       await _tts.setVolume(1.0);
 
-      // Use the voice's introduction
-      await _tts.stop();
+      // Speak the voice's introduction
       await _tts.speak(voice.introduction);
-      
+
       print('Voice preview: ${voice.name} - ${voice.introduction}');
     } catch (e) {
       print('Voice preview error: $e');
+      // Show a snackbar or toast to inform the user
+      Get.snackbar(
+        'Voice Preview',
+        'Unable to preview voice. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isPreviewing.value = false;
     }
   }
 
@@ -61,7 +76,8 @@ class VoiceController extends GetxController {
     try {
       final u = FirebaseAuth.instance.currentUser;
       if (u == null) return 'your assistant';
-      final doc = await FirebaseFirestore.instance.collection('Users').doc(u.uid).get();
+      final doc =
+          await FirebaseFirestore.instance.collection('Users').doc(u.uid).get();
       final data = doc.data();
       final first = (data?['FirstName'] ?? '').toString();
       if (first.isNotEmpty) return first;
@@ -87,5 +103,6 @@ class VoiceController extends GetxController {
     }
   }
 
-  VoiceModel get currentVoice => selectedVoice.value ?? VoiceConstants.defaultVoice;
+  VoiceModel get currentVoice =>
+      selectedVoice.value ?? VoiceConstants.defaultVoice;
 }

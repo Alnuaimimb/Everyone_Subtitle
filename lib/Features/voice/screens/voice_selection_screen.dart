@@ -51,7 +51,7 @@ class VoiceSelectionScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 1.0, // Increased aspect ratio to make cards shorter
                   ),
                   itemCount: controller.availableVoices.length,
                   itemBuilder: (context, index) {

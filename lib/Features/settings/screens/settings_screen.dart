@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:everyone_subtitle/Features/quiz/screens/quiz_intro_screen.dart';
 import 'package:everyone_subtitle/Features/voice/screens/voice_selection_screen.dart';
+import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
@@ -302,8 +303,19 @@ class SettingsScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+
+              // Clear all local data
+              final storage = GetStorage();
+              await storage.remove('selectedVoice');
+              await storage.remove('hasCompletedQuiz');
+              await storage.remove('userProfile');
+              await storage.remove('responseHistory');
+
+              // Sign out from Firebase
               await FirebaseAuth.instance.signOut();
-              Get.offAllNamed('/login'); // You'll need to set up named routes
+
+              // Navigate to login screen
+              Get.offAll(() => const LoginScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: TColors.error,

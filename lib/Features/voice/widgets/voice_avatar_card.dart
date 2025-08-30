@@ -40,8 +40,8 @@ class VoiceAvatarCard extends StatelessWidget {
           children: [
             // Avatar Image
             Container(
-              width: 80,
-              height: 80,
+              width: 70,
+              height: 70,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -68,7 +68,7 @@ class VoiceAvatarCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             // Voice Name
             Text(
@@ -107,21 +107,21 @@ class VoiceAvatarCard extends StatelessWidget {
                   ),
                 ),
               ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             
             // Preview Button
             if (isSelected)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.green,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   TTexts.voicePreview,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
