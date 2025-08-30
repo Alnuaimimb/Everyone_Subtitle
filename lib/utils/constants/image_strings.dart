@@ -9,6 +9,14 @@ class TImages {
   static const String google = "assets/logos/google-icon.png";
   static const String facebook = "assets/logos/facebook-icon.png";
 
+  // -- Voice Avatars (actual files in assets/images/voices)
+  // Named variants used across the app
+  static const String saraVoiceAvatar = "assets/images/voices/Sara.png";
+  static const String kimVoiceAvatar = "assets/images/voices/Kim.png";
+  static const String emaVoiceAvatar = "assets/images/voices/Ema.png";
+  static const String alexVoiceAvatar =
+      "assets/images/voices/Alex.png"; // Alex voice avatar
+
   // -- Animations
   static const String productsIllustration =
       "assets/images/animations/sammy-line-workout.gif";

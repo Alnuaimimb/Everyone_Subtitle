@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:everyone_subtitle/Features/quiz/screens/quiz_intro_screen.dart';
+import 'package:everyone_subtitle/Features/voice/screens/voice_selection_screen.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
@@ -54,6 +55,13 @@ class SettingsScreen extends StatelessWidget {
                     title: 'View Profile',
                     subtitle: 'See your communication style analysis',
                     onTap: () => _showProfileDialog(context),
+                  ),
+                  _buildSettingTile(
+                    context,
+                    icon: Icons.record_voice_over,
+                    title: 'AI Voice',
+                    subtitle: 'Change your AI assistant voice',
+                    onTap: () => Get.to(() => const VoiceSelectionScreen()),
                   ),
                 ],
               ),

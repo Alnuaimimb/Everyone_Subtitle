@@ -122,6 +122,15 @@ class TTexts {
   static const String select = "Select";
   static const String generateNewResponse = "Generate New Response";
 
+  // -- Voice Selection
+  static const String voiceSelectionTitle = "Choose Your AI Voice";
+  static const String voiceSelectionSubtitle = "Choose the voice that best represents your AI assistant";
+  static const String voiceSelectionContinue = "Continue";
+  static const String voiceSelectionSelectVoice = "Select a Voice";
+  static const String voiceSelected = "Selected";
+  static const String voicePreview = "Preview Voice";
+  static const String voiceSelect = "Select Voice";
+
   // -- Quiz
   static const String quizTitle = "Personality Quiz";
   static const String quizIntroTitle = "Let's Get to Know You";

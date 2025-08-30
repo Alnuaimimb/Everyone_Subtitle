@@ -75,6 +75,7 @@ flutter:
     - assets/logos/
     - assets/images/content/
     - assets/images/animations/
+    - assets/images/voices/
     - assets/icons/payment_methods/
     - assets/images/on_boarding_images/
     - lib/utils/constants/.env

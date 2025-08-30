@@ -6,7 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:everyone_subtitle/Features/quiz/controllers/quiz_controller.dart';
 import 'package:everyone_subtitle/Features/quiz/models/user_profile.dart';
 import 'package:everyone_subtitle/data/services/ai/openai_service.dart';
-import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
+import 'package:everyone_subtitle/Features/voice/screens/voice_selection_screen.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/popups/loaders.dart';
 
@@ -54,14 +54,12 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
     }
   }
 
-  Future<void> _saveProfileToFirestore(UserProfile profile, List<Map<String, String>> answers) async {
+  Future<void> _saveProfileToFirestore(
+      UserProfile profile, List<Map<String, String>> answers) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .set({
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
           'hasCompletedQuiz': true,
           'profile': profile.toJson(),
           // Also store an explicit UserProfile object with metadata
@@ -260,7 +258,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
           height: 56,
           child: ElevatedButton(
             onPressed: () {
-              Get.offAll(() => const SpeechInputScreen());
+              Get.offAll(() => const VoiceSelectionScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: TColors.primary,
@@ -327,7 +325,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Get.offAll(() => const SpeechInputScreen());
+                  Get.offAll(() => const VoiceSelectionScreen());
                 },
                 child: const Text('Skip for Now'),
               ),
