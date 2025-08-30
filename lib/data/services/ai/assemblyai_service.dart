@@ -5,21 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:everyone_subtitle/utils/constants/api.dart';
 
 class AssemblyAIService {
-  // Read the API key from build-time define to avoid committing secrets.
-  // Pass via: --dart-define=ASSEMBLYAI_API_KEY=your_key
-  static String get _apiKey {
-    const key = String.fromEnvironment('ASSEMBLYAI_API_KEY');
-    if (key.isNotEmpty) return key;
-
-    // Development fallback (do not use in production)
-    const devFallback = '218354fc97824058bb1907edaf7a0998';
-    if (devFallback.isNotEmpty) return devFallback;
-
-    throw Exception(
-        'ASSEMBLYAI_API_KEY is not set. Run with --dart-define=ASSEMBLYAI_API_KEY=your_key');
-  }
+  // Read the API key from .env or --dart-define
+  static String get _apiKey => Env.assemblyAIKey;
 
   static const String _baseUrl = 'https://api.assemblyai.com/v2';
 
