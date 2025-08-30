@@ -5,10 +5,13 @@ import 'package:everyone_subtitle/Features/voice/models/voice_model.dart';
 import 'package:everyone_subtitle/data/services/ai/assemblyai_service.dart';
 import 'package:everyone_subtitle/data/services/ai/openai_service.dart'
     as openai;
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:everyone_subtitle/data/services/profile/profile_improvement_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
 /// Controls the shared state between the conversation pages.
 /// Holds the transcript (speech-to-text), recording state, and generated responses.
@@ -28,7 +31,7 @@ class ConversationController extends GetxController {
   int _sessionId = 0; // increments every start/reset to ignore stale callbacks
 
   // TTS functionality
-  final FlutterTts _flutterTts = FlutterTts();
+  AudioPlayer? _audioPlayer;
   final RxBool isSpeaking = false.obs;
 
   // Response history for profile improvement
@@ -57,12 +60,34 @@ class ConversationController extends GetxController {
     _initializeTTS();
   }
 
-  void _loadUserProfile() {
+  void _loadUserProfile() async {
     try {
       final storage = GetStorage();
       final profileData = storage.read('userProfile');
+
       if (profileData != null) {
         userProfile.value = UserProfile.fromJson(profileData);
+      } else {
+        // If not in local storage, try to load from Firestore
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          try {
+            final doc = await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(user.uid)
+                .get();
+            if (doc.exists) {
+              final data = doc.data();
+              if (data?['profile'] != null) {
+                userProfile.value = UserProfile.fromJson(data!['profile']);
+                // Save to local storage for future use
+                await storage.write('userProfile', data['profile']);
+              }
+            }
+          } catch (e) {
+            print('Error loading profile from Firestore: $e');
+          }
+        }
       }
     } catch (e) {
       print('Error loading user profile: $e');
@@ -92,54 +117,160 @@ class ConversationController extends GetxController {
     }
   }
 
-  // Initialize TTS
+  // Initialize TTS (OpenAI-based)
   Future<void> _initializeTTS() async {
-    await _flutterTts.setLanguage("en-US");
-
-    // Load selected voice settings
-    final storage = GetStorage();
-    final voiceData = storage.read('selectedVoice');
-    if (voiceData != null) {
-      try {
-        final voice = VoiceModel.fromJson(voiceData);
-        await _flutterTts.setSpeechRate(voice.speechRate);
-        await _flutterTts.setPitch(voice.pitch);
-      } catch (e) {
-        print('Error loading voice settings: $e');
-        // Fallback to default settings
-        await _flutterTts.setSpeechRate(0.5);
-        await _flutterTts.setPitch(1.0);
-      }
-    } else {
-      // Default settings
-      await _flutterTts.setSpeechRate(0.5);
-      await _flutterTts.setPitch(1.0);
-    }
-
-    await _flutterTts.setVolume(1.0);
-
-    _flutterTts.setStartHandler(() {
-      isSpeaking.value = true;
-    });
-
-    _flutterTts.setCompletionHandler(() {
-      isSpeaking.value = false;
-    });
-
-    _flutterTts.setErrorHandler((msg) {
-      isSpeaking.value = false;
-      print('TTS Error: $msg');
-    });
+    // OpenAI TTS is initialized on-demand
+    print('TTS initialized for OpenAI voice generation');
   }
 
-  // Speak the current response
+  // Speak the current response using OpenAI TTS
   Future<void> speakResponse() async {
     if (responseText.value.isEmpty) return;
 
     if (isSpeaking.value) {
-      await _flutterTts.stop();
-    } else {
-      await _flutterTts.speak(responseText.value);
+      isSpeaking.value = false;
+      return;
+    }
+
+    try {
+      isSpeaking.value = true;
+      print('[ConversationController] Starting speech for response...');
+
+      // Get selected voice
+      final storage = GetStorage();
+      final voiceData = storage.read('selectedVoice');
+      String voiceName = 'Sara';
+      String gender = 'female';
+
+      if (voiceData != null) {
+        try {
+          final voice = VoiceModel.fromJson(voiceData);
+          voiceName = voice.name;
+          gender = voice.gender;
+          print('[ConversationController] Using voice: $voiceName ($gender)');
+        } catch (e) {
+          print('[ConversationController] Error loading voice settings: $e');
+        }
+      } else {
+        print(
+            '[ConversationController] No voice selected, using default: $voiceName');
+      }
+
+      // Generate speech using OpenAI TTS
+      print('[ConversationController] Generating speech with OpenAI TTS...');
+      final audioData = await openai.OpenAIService.generateSpeech(
+        text: responseText.value,
+        voiceName: voiceName,
+        gender: gender,
+      );
+
+      if (audioData != null && audioData.isNotEmpty) {
+        print(
+            '[ConversationController] OpenAI TTS generated ${audioData.length} bytes');
+
+        // Play the generated audio
+        await _playResponseAudio(audioData);
+      } else {
+        print(
+            '[ConversationController] Failed to generate speech with OpenAI TTS');
+        Get.snackbar(
+          'Speech Generation Failed',
+          'Unable to generate speech for the response.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      print('[ConversationController] Error in speakResponse: $e');
+      print('[ConversationController] Error type: ${e.runtimeType}');
+
+      Get.snackbar(
+        'Speech Error',
+        'Unable to speak the response. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isSpeaking.value = false;
+    }
+  }
+
+  // Get or create AudioPlayer instance
+  AudioPlayer _getOrCreateAudioPlayer() {
+    if (_audioPlayer == null) {
+      _audioPlayer = AudioPlayer();
+      print('[ConversationController] Created new AudioPlayer instance');
+    }
+    return _audioPlayer!;
+  }
+
+  // Play the response audio using audioplayers
+  Future<void> _playResponseAudio(Uint8List audioData) async {
+    try {
+      print('[ConversationController] Starting audio playback...');
+
+      // Get or create AudioPlayer
+      final audioPlayer = _getOrCreateAudioPlayer();
+
+      // Get temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final audioFile = File('${tempDir.path}/response_audio.mp3');
+      print('[ConversationController] Temporary file path: ${audioFile.path}');
+
+      // Write audio data to file
+      await audioFile.writeAsBytes(audioData);
+      print('[ConversationController] Audio data written to file successfully');
+
+      // Verify file exists and has content
+      if (await audioFile.exists()) {
+        final fileSize = await audioFile.length();
+        print(
+            '[ConversationController] File exists with size: $fileSize bytes');
+      } else {
+        throw Exception('Audio file was not created');
+      }
+
+      // Try to play using audioplayers
+      try {
+        // Stop any current playback
+        await audioPlayer.stop();
+        print('[ConversationController] Stopped current playback');
+
+        // Create file source and play
+        final fileSource = DeviceFileSource(audioFile.path);
+        await audioPlayer.play(fileSource);
+        print('[ConversationController] Audio playback started successfully');
+      } catch (e) {
+        print('[ConversationController] audioplayers playback failed: $e');
+
+        // Try alternative method: BytesSource
+        try {
+          await audioPlayer.stop();
+          await audioPlayer.play(BytesSource(audioData));
+          print('[ConversationController] BytesSource playback successful');
+        } catch (e2) {
+          print('[ConversationController] BytesSource also failed: $e2');
+
+          // Show user that audio was generated but playback failed
+          Get.snackbar(
+            'Response Generated Successfully! 🎉',
+            'Audio was generated but playback is not available. Please check your device audio settings.',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      }
+    } catch (e) {
+      print('[ConversationController] Error in _playResponseAudio: $e');
+      print('[ConversationController] Error type: ${e.runtimeType}');
+
+      // Show user that audio was generated but playback failed
+      Get.snackbar(
+        'Response Generated Successfully! 🎉',
+        'Audio was generated but playback is not available. Please check your device audio settings.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 
@@ -179,7 +310,7 @@ class ConversationController extends GetxController {
   @override
   void onClose() {
     AssemblyAIService.dispose();
-    _flutterTts.stop();
+    _audioPlayer?.dispose();
     super.onClose();
   }
 

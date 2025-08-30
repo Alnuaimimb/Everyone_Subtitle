@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:everyone_subtitle/Features/quiz/models/user_profile.dart';
 import 'package:everyone_subtitle/utils/constants/api.dart';
@@ -6,6 +7,7 @@ import 'package:everyone_subtitle/utils/constants/api.dart';
 class OpenAIService {
   // Endpoint & model (stable)
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
+  static const String _ttsUrl = 'https://api.openai.com/v1/audio/speech';
   static const String _model = 'gpt-4o-mini';
 
   // Enable/disable remote calls via build flag (default = true)
@@ -16,6 +18,135 @@ class OpenAIService {
   static String get _apiKey => Env.openaiApiKeyOrNull ?? '';
 
   // ====================== PUBLIC API ======================
+
+  /// Generate AI voice characteristics using OpenAI
+  static Future<Map<String, dynamic>> generateVoiceCharacteristics({
+    required String voiceName,
+    required String gender,
+  }) async {
+    final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
+    print('[OpenAI] Generating voice for $voiceName ($gender)');
+
+    try {
+      if (!_useRemote) return _fallbackVoiceCharacteristics(voiceName, gender);
+
+      final prompt = '''
+Generate voice characteristics for an AI assistant named $voiceName (gender: $gender).
+
+Return ONLY a JSON object with this exact format:
+{
+  "pitch": 0.8-1.2,
+  "speechRate": 0.4-0.8,
+  "introduction": "A brief, natural introduction from the voice's perspective"
+}
+
+Requirements:
+- Pitch: 0.8-1.2 (lower for male, higher for female)
+- Speech Rate: 0.4-0.8 (slower for calm, faster for energetic)
+- Introduction: Natural, friendly, 1-2 sentences
+- Make it sound like a real person introducing themselves
+''';
+
+      final resp = await http
+          .post(
+            Uri.parse(_baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+            },
+            body: jsonEncode({
+              'model': _model,
+              'messages': [
+                {
+                  'role': 'system',
+                  'content': 'You are a voice design expert. Return ONLY JSON.'
+                },
+                {'role': 'user', 'content': prompt},
+              ],
+              'temperature': 0.8,
+              'max_tokens': 200,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print('[OpenAI] Voice generation code=${resp.statusCode}');
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        final content =
+            (data['choices']?[0]?['message']?['content'] ?? '') as String;
+        return _parseVoiceCharacteristics(content, voiceName, gender);
+      } else {
+        print('[OpenAI] Voice generation body=${resp.body}');
+        return _fallbackVoiceCharacteristics(voiceName, gender);
+      }
+    } catch (e) {
+      print('[OpenAI] Voice generation exception: $e');
+      return _fallbackVoiceCharacteristics(voiceName, gender);
+    }
+  }
+
+  /// Generate speech using OpenAI TTS API
+  static Future<Uint8List?> generateSpeech({
+    required String text,
+    required String voiceName,
+    required String gender,
+  }) async {
+    final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
+    print('[OpenAI] Generating speech for $voiceName ($gender)');
+
+    try {
+      if (!_useRemote) return null;
+
+      // Map voice names to OpenAI voice IDs
+      String voiceId;
+      switch (voiceName.toLowerCase()) {
+        case 'sara':
+          voiceId = 'alloy'; // Female voice
+          break;
+        case 'kim':
+          voiceId = 'echo'; // Male voice
+          break;
+        case 'ema':
+          voiceId = 'nova'; // Female voice
+          break;
+        case 'alex':
+          voiceId = 'onyx'; // Male voice
+          break;
+        default:
+          voiceId = gender.toLowerCase() == 'male' ? 'echo' : 'alloy';
+      }
+
+      final resp = await http
+          .post(
+            Uri.parse(_ttsUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+            },
+            body: jsonEncode({
+              'model': 'tts-1',
+              'input': text,
+              'voice': voiceId,
+              'response_format': 'mp3',
+              'speed': 1.0,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      print('[OpenAI] TTS code=${resp.statusCode}');
+      if (resp.statusCode == 200) {
+        print('[OpenAI] TTS success - received ${resp.bodyBytes.length} bytes');
+        return resp.bodyBytes;
+      } else {
+        print(
+            '[OpenAI] TTS error - status: ${resp.statusCode}, body: ${resp.body}');
+        return null;
+      }
+    } catch (e) {
+      print('[OpenAI] TTS exception: $e');
+      return null;
+    }
+  }
 
   /// Build a user profile from quiz answers (calls OpenAI, falls back if needed)
   static Future<UserProfile> generateUserProfile(
@@ -164,7 +295,8 @@ Guidelines:
     final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
     print('[OpenAI] useRemote=$_useRemote model=$_model keyLen=$keyLen');
     try {
-      if (!_useRemote) return _fallbackSingleResponse(transcript, userProfile, userInfo);
+      if (!_useRemote)
+        return _fallbackSingleResponse(transcript, userProfile, userInfo);
 
       final profileInfo = userProfile != null
           ? '''
@@ -182,7 +314,8 @@ ${_buildStyleGuidelines(userProfile)}
       final userInfoSection = (userInfo != null && userInfo.isNotEmpty)
           ? () {
               final b = StringBuffer();
-              b.writeln('User Identity (use facts when relevant; do not invent):');
+              b.writeln(
+                  'User Identity (use facts when relevant; do not invent):');
               userInfo.forEach((k, v) {
                 if (v.trim().isNotEmpty) b.writeln('- $k: $v');
               });
@@ -524,8 +657,8 @@ $answersText
     };
   }
 
-  static String _fallbackSingleResponse(
-      String transcript, UserProfile? userProfile, Map<String, String>? userInfo) {
+  static String _fallbackSingleResponse(String transcript,
+      UserProfile? userProfile, Map<String, String>? userInfo) {
     final t = transcript.toLowerCase();
 
     // Add variety to fallback responses
@@ -546,10 +679,14 @@ $answersText
         "Weather always affects my mood.",
         "I enjoy talking about the weather.",
       ]);
-    } else if (t.contains('your name') || t.contains("what's your name") || t.contains('whats your name') || t.contains('who are you')) {
-      final name = (userInfo != null && (userInfo['FirstName']?.isNotEmpty == true))
-          ? userInfo['FirstName']
-          : null;
+    } else if (t.contains('your name') ||
+        t.contains("what's your name") ||
+        t.contains('whats your name') ||
+        t.contains('who are you')) {
+      final name =
+          (userInfo != null && (userInfo['FirstName']?.isNotEmpty == true))
+              ? userInfo['FirstName']
+              : null;
       if (name != null) {
         responses.addAll([
           "I'm $name.",
@@ -634,5 +771,34 @@ $answersText
     }
 
     return selectedResponse;
+  }
+
+  // ====================== VOICE GENERATION HELPERS ======================
+
+  static Map<String, dynamic> _fallbackVoiceCharacteristics(
+      String voiceName, String gender) {
+    final isMale = gender.toLowerCase() == 'male';
+    return {
+      'pitch': isMale ? 0.9 : 1.1,
+      'speechRate': 0.6,
+      'introduction':
+          'Hi, my name is $voiceName! I\'m here to help you communicate more effectively.',
+    };
+  }
+
+  static Map<String, dynamic> _parseVoiceCharacteristics(
+      String response, String voiceName, String gender) {
+    try {
+      final data = jsonDecode(response);
+      return {
+        'pitch': (data['pitch'] ?? 1.0).toDouble(),
+        'speechRate': (data['speechRate'] ?? 0.6).toDouble(),
+        'introduction': data['introduction'] ??
+            'Hi, my name is $voiceName! I\'m here to help you.',
+      };
+    } catch (e) {
+      print('[OpenAI] Error parsing voice characteristics: $e');
+      return _fallbackVoiceCharacteristics(voiceName, gender);
+    }
   }
 }

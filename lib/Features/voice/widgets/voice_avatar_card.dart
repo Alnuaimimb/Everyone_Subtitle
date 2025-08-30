@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:everyone_subtitle/Features/voice/models/voice_model.dart';
+import 'package:everyone_subtitle/Features/voice/controllers/voice_controller.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
@@ -40,8 +42,8 @@ class VoiceAvatarCard extends StatelessWidget {
           children: [
             // Avatar Image
             Container(
-              width: 70,
-              height: 70,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -57,10 +59,10 @@ class VoiceAvatarCard extends StatelessWidget {
                     return Container(
                       color: Colors.grey.shade200,
                       child: Icon(
-                        voice.gender == 'female'
+                        voice.gender == 'male'
                             ? Icons.person
                             : Icons.person_outline,
-                        size: 40,
+                        size: 30,
                         color: Colors.grey.shade600,
                       ),
                     );
@@ -68,64 +70,77 @@ class VoiceAvatarCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
 
             // Voice Name
             Text(
               voice.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: TColors.textPrimary,
                     fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
             ),
-            const SizedBox(height: 4),
-
-            // Voice Type
-            Text(
-              voice.voiceType[0].toUpperCase() + voice.voiceType.substring(1),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: TColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
 
             // Selection Indicator
             if (isSelected)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: TColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  TTexts.voiceSelected,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 4),
-            
-            // Preview Button
-            if (isSelected)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.green,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  TTexts.voicePreview,
+                  'Selected',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 9,
+                    fontSize: 8,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
+            const SizedBox(height: 2),
+
+            // Preview Button
+            if (isSelected)
+              Obx(() {
+                final controller = Get.find<VoiceController>();
+                final isPreviewing = controller.isPreviewing.value;
+
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: isPreviewing ? Colors.orange : Colors.green,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isPreviewing)
+                        const SizedBox(
+                          width: 6,
+                          height: 6,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                      if (isPreviewing) const SizedBox(width: 2),
+                      Text(
+                        isPreviewing ? 'Gen...' : 'Preview',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 7,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
           ],
         ),
       ),

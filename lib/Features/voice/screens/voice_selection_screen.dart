@@ -42,7 +42,7 @@ class VoiceSelectionScreen extends StatelessWidget {
                       color: TColors.textSecondary,
                     ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // Voice Grid
               Expanded(
@@ -51,7 +51,8 @@ class VoiceSelectionScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 1.0, // Increased aspect ratio to make cards shorter
+                    // Fixed height per tile to avoid vertical overflow
+                    mainAxisExtent: 220,
                   ),
                   itemCount: controller.availableVoices.length,
                   itemBuilder: (context, index) {
@@ -59,17 +60,17 @@ class VoiceSelectionScreen extends StatelessWidget {
                     return Obx(() {
                       final isSelected =
                           controller.selectedVoice.value?.id == voice.id;
-                        return VoiceAvatarCard(
-                          voice: voice,
-                          isSelected: isSelected,
-                          onTap: () => controller.previewVoice(voice),
-                        );
+                      return VoiceAvatarCard(
+                        voice: voice,
+                        isSelected: isSelected,
+                        onTap: () => controller.previewVoice(voice),
+                      );
                     });
                   },
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Continue Button
               SizedBox(

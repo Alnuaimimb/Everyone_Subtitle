@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -36,8 +37,33 @@ class AuthenticationRepository extends GetxController {
     if (user != null) {
       debugPrint('User found, checking quiz completion');
 
-      // Check if user has completed the quiz
-      final hasCompletedQuiz = deviceStorage.read('hasCompletedQuiz') ?? false;
+      // Check if user has completed the quiz (check Firestore first, then local storage)
+      bool hasCompletedQuiz = false;
+
+      try {
+        // Check Firestore first
+        final doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+        if (doc.exists) {
+          final data = doc.data();
+          hasCompletedQuiz = data?['hasCompletedQuiz'] ?? false;
+
+          // If found in Firestore, update local storage
+          if (hasCompletedQuiz) {
+            await deviceStorage.write('hasCompletedQuiz', true);
+            // Also save the profile data locally if available
+            if (data?['profile'] != null) {
+              await deviceStorage.write('userProfile', data!['profile']);
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error checking Firestore: $e');
+        // Fall back to local storage if Firestore fails
+        hasCompletedQuiz = deviceStorage.read('hasCompletedQuiz') ?? false;
+      }
 
       if (hasCompletedQuiz) {
         debugPrint('Quiz completed, routing to Conversation');

@@ -1,15 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:everyone_subtitle/Features/quiz/controllers/quiz_controller.dart';
 import 'package:everyone_subtitle/Features/quiz/screens/quiz_question_screen.dart';
+import 'package:everyone_subtitle/Features/conversation/screens/speech_input_screen.dart';
 import 'package:everyone_subtitle/utils/constants/colors.dart';
 import 'package:everyone_subtitle/utils/constants/text_strings.dart';
 
-class QuizIntroScreen extends StatelessWidget {
+class QuizIntroScreen extends StatefulWidget {
   const QuizIntroScreen({super.key});
 
   @override
+  State<QuizIntroScreen> createState() => _QuizIntroScreenState();
+}
+
+class _QuizIntroScreenState extends State<QuizIntroScreen> {
+  bool _isChecking = true;
+  bool _hasCompletedQuiz = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkQuizCompletion();
+  }
+
+  Future<void> _checkQuizCompletion() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Check Firestore first
+        final doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+        if (doc.exists) {
+          final data = doc.data();
+          _hasCompletedQuiz = data?['hasCompletedQuiz'] ?? false;
+
+          if (_hasCompletedQuiz) {
+            // Update local storage
+            final storage = GetStorage();
+            await storage.write('hasCompletedQuiz', true);
+            if (data?['profile'] != null) {
+              await storage.write('userProfile', data!['profile']);
+            }
+          }
+        } else {
+          // Fall back to local storage
+          final storage = GetStorage();
+          _hasCompletedQuiz = storage.read('hasCompletedQuiz') ?? false;
+        }
+      }
+    } catch (e) {
+      print('Error checking quiz completion: $e');
+      // Fall back to local storage
+      final storage = GetStorage();
+      _hasCompletedQuiz = storage.read('hasCompletedQuiz') ?? false;
+    }
+
+    setState(() {
+      _isChecking = false;
+    });
+
+    // If quiz is completed, redirect to conversation screen
+    if (_hasCompletedQuiz) {
+      Get.offAll(() => const SpeechInputScreen());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isChecking) {
+      return Scaffold(
+        backgroundColor: TColors.lightGrey,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: TColors.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Checking your profile...',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: TColors.textSecondary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: TColors.lightGrey,
       appBar: AppBar(

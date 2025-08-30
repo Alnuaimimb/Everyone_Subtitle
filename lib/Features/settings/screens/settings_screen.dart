@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:everyone_subtitle/Features/quiz/screens/quiz_intro_screen.dart';
 import 'package:everyone_subtitle/Features/voice/screens/voice_selection_screen.dart';
 import 'package:everyone_subtitle/Features/authentication/screens/login/login.dart';
@@ -204,11 +205,32 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _resetQuizAndStart() async {
-    final storage = GetStorage();
-    await storage.remove('hasCompletedQuiz');
-    await storage.remove('userProfile');
+    try {
+      // Clear local storage
+      final storage = GetStorage();
+      await storage.remove('hasCompletedQuiz');
+      await storage.remove('userProfile');
 
-    Get.offAll(() => const QuizIntroScreen());
+      // Clear Firestore data
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({
+          'hasCompletedQuiz': false,
+          'profile': FieldValue.delete(),
+          'UserProfile': FieldValue.delete(),
+          'quizCompletedAt': FieldValue.delete(),
+        });
+      }
+
+      Get.offAll(() => const QuizIntroScreen());
+    } catch (e) {
+      print('Error resetting quiz: $e');
+      // Still proceed with local reset even if Firestore fails
+      Get.offAll(() => const QuizIntroScreen());
+    }
   }
 
   void _showProfileDialog(BuildContext context) async {
