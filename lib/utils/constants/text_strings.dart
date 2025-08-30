@@ -93,7 +93,7 @@ class TTexts {
 
   static const String Congratulatoions = "Congratulatoions";
   static const String successfullSignUpMessage =
-      "Your account has been created! verify email to continue";
+      "Welcome to your new voice";
   static const String successfullLogInMessage =
       "Welcome to your new voice";
 
