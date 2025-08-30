@@ -10,6 +10,7 @@ class UserModel {
     required this.lastName,
     required this.phoneNumber,
     required this.profilePicture,
+    this.gender = '',
   });
 
   final String id;
@@ -19,6 +20,7 @@ class UserModel {
   String lastName;
   String phoneNumber;
   String profilePicture;
+  String gender; // Optional: 'Male' | 'Female' | 'Other' | ''
   String get fullName => '$firstName $lastName';
 
   String get formattedPhoneNumber => TFormatter.formatPhoneNumber(phoneNumber);
@@ -34,6 +36,7 @@ class UserModel {
       'Email': email,
       'PhoneNumber': phoneNumber,
       'ProfilePicture': profilePicture,
+      'Gender': gender,
     };
   }
 
@@ -57,7 +60,8 @@ class UserModel {
       username: "",
       email: "",
       phoneNumber: "",
-      profilePicture: "");
+      profilePicture: "",
+      gender: "");
 
   // Factory method to create a UserModel from a Firebase document snapshot.
   factory UserModel.fromSnapshot(
@@ -71,6 +75,7 @@ class UserModel {
       email: data['Email'] ?? "",
       phoneNumber: data['PhoneNumber'] ?? "",
       profilePicture: data['ProfilePicture'] ?? "",
+      gender: data['Gender'] ?? "",
     );
   }
 }

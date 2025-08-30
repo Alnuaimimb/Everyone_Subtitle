@@ -10,17 +10,17 @@ class OpenAIService {
 
   // Enable/disable remote calls via build flag (default = true)
   // Example: flutter run --dart-define=ENABLE_OPENAI=true
-  static bool get _useRemote => Env.enableOpenAI;
+  static bool get _useRemote => Env.enableOpenAI && Env.hasOpenAIKey;
 
   // API key is provided via .env or --dart-define
-  static String get _apiKey => Env.openaiApiKey;
+  static String get _apiKey => Env.openaiApiKeyOrNull ?? '';
 
   // ====================== PUBLIC API ======================
 
   /// Build a user profile from quiz answers (calls OpenAI, falls back if needed)
   static Future<UserProfile> generateUserProfile(
       List<Map<String, String>> answers) async {
-    final keyLen = _useRemote ? _apiKey.length : 0;
+    final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
     print('[OpenAI] useRemote=$_useRemote model=$_model keyLen=$keyLen');
     try {
       if (!_useRemote) return _fallbackFromAnswers(answers);
@@ -70,7 +70,7 @@ class OpenAIService {
     required String transcript,
     UserProfile? userProfile,
   }) async {
-    final keyLen = _useRemote ? _apiKey.length : 0;
+    final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
     print('[OpenAI] useRemote=$_useRemote model=$_model keyLen=$keyLen');
     try {
       if (!_useRemote) return _fallbackSingleResponse(transcript, userProfile);
@@ -177,7 +177,7 @@ $profileInfo
   /// Quick probe to see exactly what OpenAI returns (call once at startup)
   static Future<void> debugProbe() async {
     try {
-      final keyLen = _useRemote ? _apiKey.length : 0;
+      final keyLen = _useRemote ? (_apiKey.isNotEmpty ? _apiKey.length : 0) : 0;
       print('[OpenAI] probe: useRemote=$_useRemote model=$_model keyLen=$keyLen');
       final r = await http
           .post(

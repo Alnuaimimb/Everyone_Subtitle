@@ -37,7 +37,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
       final profile = await OpenAIService.generateUserProfile(answers);
 
       // Save to Firestore
-      await _saveProfileToFirestore(profile);
+      await _saveProfileToFirestore(profile, answers);
 
       // Save to local storage
       await _saveProfileToLocal(profile);
@@ -54,7 +54,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
     }
   }
 
-  Future<void> _saveProfileToFirestore(UserProfile profile) async {
+  Future<void> _saveProfileToFirestore(UserProfile profile, List<Map<String, String>> answers) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -64,6 +64,13 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             .set({
           'hasCompletedQuiz': true,
           'profile': profile.toJson(),
+          // Also store an explicit UserProfile object with metadata
+          'UserProfile': {
+            ...profile.toJson(),
+            'model': 'gpt-4o-mini',
+            'source': 'openai_chatgpt',
+            'quiz_answers': answers,
+          },
           'quizCompletedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true)).timeout(const Duration(seconds: 3));
       } catch (_) {

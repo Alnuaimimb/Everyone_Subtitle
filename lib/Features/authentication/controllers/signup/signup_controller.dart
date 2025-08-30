@@ -68,7 +68,8 @@ class SignupController extends GetxController {
           firstName: firstName.text,
           lastName: lastName.text,
           phoneNumber: phoneNumber.text,
-          profilePicture: '');
+          profilePicture: '',
+          gender: '');
 
       final userRepository = Get.put(UserRepository());
       await userRepository.SaveUserRecord(newUser);

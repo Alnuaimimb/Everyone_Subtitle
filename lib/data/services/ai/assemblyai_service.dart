@@ -8,8 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:everyone_subtitle/utils/constants/api.dart';
 
 class AssemblyAIService {
-  // Read the API key from .env or --dart-define
-  static String get _apiKey => Env.assemblyAIKey;
+  // Read the API key from .env or --dart-define (nullable)
+  static String? get _apiKey => Env.assemblyAIKeyOrNull;
 
   static const String _baseUrl = 'https://api.assemblyai.com/v2';
 
@@ -45,6 +45,11 @@ class AssemblyAIService {
     required Function(String) onError,
   }) async {
     try {
+      // Ensure STT is enabled and key exists
+      if (!Env.enableTranscription || (_apiKey == null || _apiKey!.isEmpty)) {
+        onError('Speech-to-text unavailable: set ASSEMBLYAI_API_KEY in .env');
+        return;
+      }
       _onTranscriptCb = onTranscriptUpdate;
       _onErrorCb = onError;
       // Get temporary directory for audio file
@@ -146,6 +151,10 @@ class AssemblyAIService {
     required Function(String) onError,
   }) async {
     try {
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        onError('Speech-to-text unavailable: missing ASSEMBLYAI_API_KEY');
+        return;
+      }
       // Upload audio file (AssemblyAI expects binary POST to /upload)
       final audioFile = File(audioPath);
       if (!await audioFile.exists()) return;
@@ -155,7 +164,7 @@ class AssemblyAIService {
           .post(
             Uri.parse('$_baseUrl/upload'),
             headers: {
-              'Authorization': _apiKey,
+              'Authorization': _apiKey!,
               'Content-Type': 'application/octet-stream',
             },
             body: audioBytes,
@@ -174,7 +183,7 @@ class AssemblyAIService {
           .post(
             Uri.parse('$_baseUrl/transcript'),
             headers: {
-              'Authorization': _apiKey,
+              'Authorization': _apiKey!,
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
@@ -221,10 +230,14 @@ class AssemblyAIService {
     required Function(String) onError,
   }) async {
     try {
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        onError('Speech-to-text unavailable: missing ASSEMBLYAI_API_KEY');
+        return false;
+      }
       final response = await http.get(
         Uri.parse('$_baseUrl/transcript/$transcriptionId'),
         headers: {
-          'Authorization': _apiKey,
+          'Authorization': _apiKey!,
         },
       );
 
