@@ -56,13 +56,12 @@ class TTexts {
       "Your Account Security is Our Priority! We've Sent You a Secure Link to Safely Change Your Password and Keep Your Account Protected.";
   static const String confirmEmail = "Verify your email address!";
   static const String confirmEmailSubTitle =
-      "Congratulations! Your Account Awaits: Verify Your Email to Start Shopping and Experience a World of Unrivaled Deals and Personalized Offers.";
+      "Congratulations! Your Account Awaits: Verify Your Email to Start Using Your New Voice Assistant and Experience Personalized Conversations.";
   static const String emailNotReceivedMessage =
       "Didn’t get the email? Check your junk/spam or resend it.";
   static const String yourAccountCreatedTitle =
       "Your account successfully created!";
-  static const String yourAccountCreatedSubTitle =
-      "Welcome to your new voice";
+  static const String yourAccountCreatedSubTitle = "Welcome to your new voice";
 
   // -- Product
   static const String popularProducts = "Popular Products";
@@ -92,10 +91,8 @@ class TTexts {
       "In order to create and account, you must have to read and accept Privacy Policy & Term and conditions";
 
   static const String Congratulatoions = "Congratulatoions";
-  static const String successfullSignUpMessage =
-      "Welcome to your new voice";
-  static const String successfullLogInMessage =
-      "Welcome to your new voice";
+  static const String successfullSignUpMessage = "Welcome to your new voice";
+  static const String successfullLogInMessage = "Welcome to your new voice";
 
   // -- Conversation (New Pages)
   static const String speechToTextTitle = "Speech to Text";
@@ -124,7 +121,8 @@ class TTexts {
 
   // -- Voice Selection
   static const String voiceSelectionTitle = "Choose Your AI Voice";
-  static const String voiceSelectionSubtitle = "Choose the voice that best represents your AI assistant";
+  static const String voiceSelectionSubtitle =
+      "Choose the voice that best represents your AI assistant";
   static const String voiceSelectionContinue = "Continue";
   static const String voiceSelectionSelectVoice = "Select a Voice";
   static const String voiceSelected = "Selected";
